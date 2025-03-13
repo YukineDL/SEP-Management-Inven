@@ -22,33 +22,7 @@ public class AuthenticatedServices implements IAuthenticatedServices {
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final SecurityUtils securityUtils;
-    @Override
-    public AuthenResponseDTO login(AuthenDTO authenDTO) throws InventoryException {
-        Employee employee = employeeRepository.findByUsername(authenDTO.getUsername());
-        if(Objects.isNull(employee)){
-            throw new InventoryException(
-                    ExceptionMessage.USERNAME_INCORRECT,
-                    ExceptionMessage.messages.get(ExceptionMessage.USERNAME_INCORRECT)
-            );
-        }
-        if(employee.getIsBlock()){
-            throw new InventoryException(
-                    ExceptionMessage.ACCOUNT_BANNED,
-                    ExceptionMessage.messages.get(ExceptionMessage.ACCOUNT_BANNED)
-            );
-        }
-        boolean isCorrect = passwordEncoder.matches(authenDTO.getPassword(), employee.getPassword() );
-        if(!isCorrect){
-            throw new InventoryException(
-                    ExceptionMessage.USERNAME_INCORRECT,
-                    ExceptionMessage.messages.get(ExceptionMessage.USERNAME_INCORRECT)
-            );
-        }
-        return AuthenResponseDTO.builder()
-                .token(securityUtils.generate(employee))
-                .info(employee).build();
-    }
-
+    
     @Override
     public void register(RegisterDTO registerDTO) throws InventoryException {
         if(employeeRepository.existsByUsername(registerDTO.getUsername())){
