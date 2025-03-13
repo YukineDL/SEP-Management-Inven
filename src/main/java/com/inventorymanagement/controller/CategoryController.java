@@ -20,22 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class CategoryController {
     private final ICategoryServices categoryServices;
 
-    @PostMapping(value = "/create")
-    public ResponseEntity<Object> create(HttpServletRequest request,
-                                         @RequestBody CategoryDTO categoryDTO) {
-        try {
-            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-            categoryServices.create(authHeader, categoryDTO);
-            return new ResponseEntity<>(HttpStatus.ACCEPTED);
-        } catch (InventoryException inventoryException){
-            return new ResponseEntity<>(
-                    ApiResponse.builder()
-                            .code(inventoryException.getCode())
-                            .message(inventoryException.getMessage())
-                            .build(),
-                    HttpStatus.BAD_REQUEST
-            );
-        }
+   
     }
     @PutMapping(value = "/update/{categoryCode}")
     public ResponseEntity<Object> updateByCode(HttpServletRequest request,

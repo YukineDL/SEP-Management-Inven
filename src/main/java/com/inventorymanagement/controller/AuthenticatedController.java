@@ -16,21 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/authenticated")
 public class AuthenticatedController {
     private final IAuthenticatedServices authenticatedServices;
-    @PostMapping(value = "/register")
-    public ResponseEntity<Object> register(@RequestBody RegisterDTO registerDTO){
-           try {
-               authenticatedServices.register(registerDTO);
-               return new ResponseEntity<>(HttpStatus.OK);
-           } catch (InventoryException exception){
-               return new ResponseEntity<>(
-                       ApiResponse.builder()
-                               .code(HttpStatus.BAD_REQUEST)
-                               .message(exception.getMessage())
-                               .build(),
-                       HttpStatus.BAD_REQUEST
-               );
-           }
-    }
+   
     @PostMapping(value = "/login")
     public ResponseEntity<Object> login(@RequestBody AuthenDTO authenDTO){
             try {
