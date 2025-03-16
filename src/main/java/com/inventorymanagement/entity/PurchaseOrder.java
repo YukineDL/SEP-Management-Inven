@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -34,4 +35,16 @@ public class PurchaseOrder {
     private LocalDate deliveryDate;
     @Column(name = "create_at")
     private LocalDate createAt;
+    @Column(name = "username")
+    private String username;
+    @Column(name = "action_time")
+    private LocalDateTime actionTime;
+    @Column(name = "create_at_date_time")
+    private LocalDateTime createAtDateTime;
+    @Column(name = "delivery_at")
+    private LocalDateTime deliveryAt;
+    @Column(name = "total_quantity")
+    private Integer totalQuantity;
+    @Column(name = "is_used")
+    private Boolean isUsed;
 }
