@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -22,4 +23,10 @@ public class PurchaseDTO {
     private LocalDate deliveryDate;
     private String deliveryStatus;
     private String approve;
+    private LocalDate createAt;
+    private LocalDateTime actionTime;
+    private String username;
+    private LocalDateTime createAtDateTime;
+    private LocalDateTime deliveryAt;
+    private Integer totalQuantity;
 }
