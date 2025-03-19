@@ -87,20 +87,7 @@ public class PurchaseOrderServicesImpl implements IPurchaseOrderServices {
         );
     }
 
-    @Override
-    public void approvePurchaseOrder(String authHeader, String purchaseCode, String approveStatus) throws InventoryException {
-        checkPermission(authHeader);
-        Optional<PurchaseOrder> purchaseOrderOp = purchaseOrderRepository.findByCode(purchaseCode);
-        if(purchaseOrderOp.isEmpty()){
-            throw new InventoryException(
-                    ExceptionMessage.PURCHASE_ORDER_NOT_EXIST,
-                    ExceptionMessage.messages.get(ExceptionMessage.PURCHASE_ORDER_NOT_EXIST)
-            );
-        }
-        PurchaseOrder purchaseOrder = purchaseOrderOp.get();
-        purchaseOrder.setApprove(approveStatus);
-        purchaseOrderRepository.save(purchaseOrder);
-    }
+   
 
     @Override
     public void receivePurchaseOrder(String authHeader, String purchaseCode) throws InventoryException {
