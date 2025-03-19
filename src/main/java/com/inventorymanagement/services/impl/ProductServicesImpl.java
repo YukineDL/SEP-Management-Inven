@@ -5,26 +5,27 @@ import com.inventorymanagement.dto.ProductCategoryDTO;
 import com.inventorymanagement.dto.ProductCreateDTO;
 import com.inventorymanagement.dto.ProductDTO;
 import com.inventorymanagement.dto.ProductSearchDTO;
-import com.inventorymanagement.entity.Brand;
-import com.inventorymanagement.entity.Category;
-import com.inventorymanagement.entity.Employee;
-import com.inventorymanagement.entity.Product;
+import com.inventorymanagement.entity.*;
 import com.inventorymanagement.exception.ExceptionMessage;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.repository.BrandRepository;
 import com.inventorymanagement.repository.CategoryRepository;
+import com.inventorymanagement.repository.ProcessCheckRepository;
 import com.inventorymanagement.repository.ProductRepository;
 import com.inventorymanagement.repository.custom.ProductRepositoryCustom;
 import com.inventorymanagement.services.IEmployeeServices;
 import com.inventorymanagement.services.IProductServices;
+import com.inventorymanagement.utils.Base64Utils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,8 +36,12 @@ public class ProductServicesImpl implements IProductServices {
     private final ProductRepositoryCustom productRepositoryCustom;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
+    private final Base64Utils base64Utils;
+    private final CloudinaryServices cloudinaryServices;
+    private final ProcessCheckRepository processCheckRepository;
+
     @Override
-    public void createProduct(String authHeader, ProductCreateDTO productDTO) throws InventoryException {
+    public void createProduct(String authHeader, ProductCreateDTO productDTO) throws InventoryException, IOException {
         Employee me = employeeServices.getFullInformation(authHeader);
         if(!Constants.LIST_MANAGER.contains(me.getRoleCode())){
             throw new InventoryException(
@@ -53,7 +58,7 @@ public class ProductServicesImpl implements IProductServices {
         }
         String productCode = Constants.PRODUCT_PREFIX_CODE
                 + String.format("%05d", productRepository.count() + 1);
-
+        // get string base 64 image and decode to byte and store to database
         Product product = Product.builder()
                 .name(productDTO.getProductName())
                 .code(productCode)
@@ -65,12 +70,14 @@ public class ProductServicesImpl implements IProductServices {
                 .createAt(LocalDateTime.now())
                 .createBy(me.getUsername())
                 .build();
-        productRepository.save(product);
+        String url = cloudinaryServices.uploadImage(productDTO.getImageBase64());
+        product.setImagePath(url);
+        productRepository.saveAndFlush(product);
     }
 
 
     @Override
-    public Page<ProductDTO> findAllBySearchRequest(ProductSearchDTO searchDTO, Pageable pageable){
+    public Page<ProductDTO> findAllBySearchRequest(ProductSearchDTO searchDTO, Pageable pageable) throws IOException {
         return productRepositoryCustom.findAllBySearchRequest(searchDTO, pageable);
     }
 
@@ -99,11 +106,12 @@ public class ProductServicesImpl implements IProductServices {
         }
         Product product = productOp.get();
         product.updateProduct(productCreateDTO);
+        product.setImagePath(base64Utils.saveImage(productCreateDTO.getImageBase64(),productCode));
         productRepository.save(product);
     }
 
     @Override
-    public ProductDTO findByCode(String code) throws InventoryException {
+    public ProductDTO findByCode(String code) throws InventoryException, IOException {
         Optional<Product> productOP = productRepository.findByCode(code);
         if(productOP.isEmpty()){
             throw new InventoryException(
@@ -133,7 +141,7 @@ public class ProductServicesImpl implements IProductServices {
     }
 
     @Override
-    public List<ProductCategoryDTO> getProductsDependCategoryCode() {
+    public List<ProductCategoryDTO> getProductsDependCategoryCode() throws IOException {
         List<ProductCategoryDTO> results = new ArrayList<>();
         Map<String, List<ProductDTO>> mapCategoryProduct = new HashMap<>();
         Map<String, Category> categoryMapValue = categoryRepository.findAll().stream().collect(

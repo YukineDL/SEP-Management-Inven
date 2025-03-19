@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 
 @RestController
 @RequestMapping(value = "/products")
@@ -36,6 +38,8 @@ public class ProductController {
                             .build(),
                     HttpStatus.BAD_REQUEST
             );
+        } catch (IOException e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     @GetMapping(value = "/find-all")
@@ -97,6 +101,11 @@ public class ProductController {
                             .build(),
                     HttpStatus.BAD_REQUEST
             );
+        } catch (IOException e) {
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
     }
     @GetMapping(value = "/category/{categoryCode}")
@@ -110,10 +119,18 @@ public class ProductController {
             );
     }
     @GetMapping(value = "/get-list-products-category")
-    public ResponseEntity<Object> getAllDependCategory(){
-        return new ResponseEntity<>(
-                productServices.getProductsDependCategoryCode(),
-                HttpStatus.OK
-        );
+    public ResponseEntity<Object> getAllDependCategory() {
+       try {
+           return new ResponseEntity<>(
+                   productServices.getProductsDependCategoryCode(),
+                   HttpStatus.OK
+           );
+       } catch (IOException e){
+           return new ResponseEntity<>(
+                   e.getMessage(),
+                   HttpStatus.INTERNAL_SERVER_ERROR
+           );
+       }
+
     }
 }
