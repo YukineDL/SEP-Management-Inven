@@ -53,22 +53,7 @@ public class PurchaseOrderController {
             );
         }
     }
-    @PutMapping(value = "/{purchaseOrderCode}/receive-product")
-    public ResponseEntity<Object> receivePurchaseProductOrder(@PathVariable String purchaseOrderCode,
-                                                              HttpServletRequest request){
-        try {
-            String authHeader = request.getHeader("Authorization");
-            purchaseOrderServices.receivePurchaseOrder(authHeader,purchaseOrderCode);
-            return new ResponseEntity<>(HttpStatus.ACCEPTED);
-        } catch (InventoryException exception){
-            return new ResponseEntity<>(
-                    ApiResponse.builder()
-                            .codeMessage(exception.getCodeMessage())
-                            .message(exception.getMessage())
-                            .build(),HttpStatus.BAD_REQUEST
-            );
-        }
-    }
+  
     @GetMapping(value = "/{purchaseOrderCode}")
     public ResponseEntity<Object> getPurchaseOrder(@PathVariable String purchaseOrderCode){
         try {
