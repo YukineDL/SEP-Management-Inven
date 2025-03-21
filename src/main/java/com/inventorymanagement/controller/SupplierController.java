@@ -56,37 +56,5 @@ public class SupplierController {
                 HttpStatus.OK
         );
     }
-    @PutMapping(value = "/{id}/delete")
-    public ResponseEntity<Object> deleteById(@PathVariable Integer id,
-                                             @RequestParam Boolean isDeleted){
-        try {
-            supplierServices.deleteById(id,isDeleted);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (InventoryException exception){
-            return new ResponseEntity<>(
-                    ApiResponse.builder()
-                            .code(exception.getCode())
-                            .message(exception.getMessage())
-                            .build(),
-                    HttpStatus.BAD_REQUEST
-            );
-        }
-    }
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<Object> findById(@PathVariable Integer id){
-        try {
-            return new ResponseEntity<>(
-                    supplierServices.findById(id),
-                    HttpStatus.OK
-            );
-        } catch (InventoryException exception){
-            return new ResponseEntity<>(
-                    ApiResponse.builder()
-                            .codeMessage(exception.getCodeMessage())
-                            .message(exception.getMessage())
-                            .build(),
-                    HttpStatus.BAD_REQUEST
-            );
-        }
-    }
+    
 }
