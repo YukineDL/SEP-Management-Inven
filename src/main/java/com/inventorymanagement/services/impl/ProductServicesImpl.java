@@ -17,6 +17,7 @@ import com.inventorymanagement.services.IEmployeeServices;
 import com.inventorymanagement.services.IProductServices;
 import com.inventorymanagement.utils.Base64Utils;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,12 +51,6 @@ public class ProductServicesImpl implements IProductServices {
             );
         }
         validateDataDTO(productDTO);
-        if(productRepository.existsByName(productDTO.getProductName())){
-            throw new InventoryException(
-                    ExceptionMessage.PRODUCT_NAME_EXISTED,
-                    ExceptionMessage.messages.get(ExceptionMessage.PRODUCT_NAME_EXISTED)
-            );
-        }
         String productCode = Constants.PRODUCT_PREFIX_CODE
                 + String.format("%05d", productRepository.count() + 1);
         // get string base 64 image and decode to byte and store to database
@@ -82,7 +77,7 @@ public class ProductServicesImpl implements IProductServices {
     }
 
     @Override
-    public void updateProduct(String authHeader, ProductCreateDTO productCreateDTO, String productCode) throws InventoryException {
+    public void updateProduct(String authHeader, ProductCreateDTO productCreateDTO, String productCode) throws InventoryException, IOException {
         Employee me = employeeServices.getFullInformation(authHeader);
         if(!Constants.LIST_MANAGER.contains(me.getRoleCode())){
             throw new InventoryException(
@@ -91,12 +86,6 @@ public class ProductServicesImpl implements IProductServices {
             );
         }
         validateDataDTO(productCreateDTO);
-        if(productRepository.existsByName(productCreateDTO.getProductName())){
-            throw new InventoryException(
-                    ExceptionMessage.PRODUCT_NAME_EXISTED,
-                    ExceptionMessage.messages.get(ExceptionMessage.PRODUCT_NAME_EXISTED)
-            );
-        }
         Optional<Product> productOp = productRepository.findByCode(productCode);
         if(productOp.isEmpty()){
             throw new InventoryException(
@@ -106,7 +95,10 @@ public class ProductServicesImpl implements IProductServices {
         }
         Product product = productOp.get();
         product.updateProduct(productCreateDTO);
-        product.setImagePath(base64Utils.saveImage(productCreateDTO.getImageBase64(),productCode));
+        if(BooleanUtils.isTrue(productCreateDTO.getIsChangeImage())){
+            String url = cloudinaryServices.uploadImage(productCreateDTO.getImageBase64());
+            product.setImagePath(url);
+        }
         productRepository.save(product);
     }
 

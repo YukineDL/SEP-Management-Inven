@@ -14,4 +14,5 @@ public class ProductCreateDTO {
     private Double sellingPrice;
     private String categoryCode;
     private String brandCode;
+    private Boolean isChangeImage;
 }

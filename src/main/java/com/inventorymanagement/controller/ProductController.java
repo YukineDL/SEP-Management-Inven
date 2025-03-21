@@ -84,6 +84,9 @@ public class ProductController {
                             .build(),
                     HttpStatus.BAD_REQUEST
             );
+        }catch(IOException){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         }
     }
     @GetMapping(value = "/{productCode}")
