@@ -26,7 +26,20 @@ public class SupplierServicesImpl implements ISupplierServices {
         supplierRepository.save(supplier);
     }
 
-   
+    @Override
+    public void update(SupplierDTO dto, Integer id) throws InventoryException {
+        Optional<Supplier> supplierOP = supplierRepository.findById(id);
+        if(supplierOP.isEmpty()){
+            throw new InventoryException(
+                    ExceptionMessage.SUPPLIER_NOT_EXIST,
+                    ExceptionMessage.messages.get(ExceptionMessage.SUPPLIER_NOT_EXIST)
+            );
+        }
+        validateDTO(dto);
+        Supplier supplier = supplierOP.get();
+        supplier.updateSupplier(dto);
+        supplierRepository.save(supplier);
+    }
 
     @Override
     public Page<Supplier> findAll(Pageable pageable) {
