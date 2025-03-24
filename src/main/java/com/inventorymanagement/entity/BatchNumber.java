@@ -32,20 +32,18 @@ public class BatchNumber {
     private Integer quantityShipped;
     @Column(name = "inventoryReceiptCode")
     private String inventoryReceiptCode;
-    @Column(name = "status")
     private String status;
-    @Column(name = "createAt")
+    @Column(name = "create_at")
     private LocalDate createAt;
 
-    public BatchNumber(BatchNumberDTO batchNumberDTO, String inventoryReceiptCode) {
-        this.productCode = batchNumberDTO.getProductCode();
-        this.dateOfManufacture = batchNumberDTO.getDateOfManufacture();
-        this.dateExpired = batchNumberDTO.getDateOfExpiry();
-        this.location = batchNumberDTO.getLocation();
-        this.inventoryQuantity = batchNumberDTO.getInventoryQuantity();
-        this.quantityShipped = batchNumberDTO.getQuantityShipped();
+    @Column(name = "export_quantity")
+    private Integer exportQuantity;
+    public BatchNumber(BatchNumberTemp temp, String inventoryReceiptCode) {
+        this.productCode = temp.getProductCode();
+        this.dateOfManufacture = temp.getDateOfManufacture();
         this.inventoryReceiptCode = inventoryReceiptCode;
         this.createAt = LocalDate.now();
         this.status = Constants.BATCH_NUMBER_AVAILABLE;
+        this.exportQuantity = 0;
     }
 }
