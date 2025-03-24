@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -36,5 +37,16 @@ public class InventoryReceipt {
     private LocalDate documentDate;
     @Column(name = "number_of_receipts")
     private String numberOfReceipts;
-
+    @Column(name = "total_amount")
+    private Double totalAmount;
+    @Column(name = "username")
+    private String username;
+    @Column(name = "action_time")
+    private LocalDateTime actionTime;
+    @Column(name = "create_at_date_time")
+    private LocalDateTime createAtDateTime;
+    @Column(name = "total_quantity")
+    private Integer totalQuantity;
+    @Column(name = "supplier_id")
+    private Integer supplierId;
 }
