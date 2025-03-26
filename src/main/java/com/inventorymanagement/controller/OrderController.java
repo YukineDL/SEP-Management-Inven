@@ -79,4 +79,53 @@ public class OrderController {
         Pageable pageable = PageRequest.of(page,size);
         return new ResponseEntity<>(orderServices.findBySearchRequest(reqDTO,pageable),HttpStatus.OK);
     }
+    @PutMapping(value = "/{orderCode}/update")
+    public ResponseEntity<Object> updateByCode(@PathVariable String orderCode,
+                                               @RequestBody OrderCreateDTO dto,
+                                               HttpServletRequest request) {
+        try {
+            String authHeader = request.getHeader("Authorization");
+            orderServices.updateOrder(dto, authHeader,orderCode);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (InventoryException e){
+            return new ResponseEntity<>(
+                    ApiResponse.builder().build(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+    @PutMapping(value = "/{orderCode}/approve")
+    public ResponseEntity<Object> approveOrder(@PathVariable String orderCode,
+                                               HttpServletRequest request) {
+        try {
+            String authHeader = request.getHeader("Authorization");
+            orderServices.approveOrder(orderCode,authHeader);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        } catch (InventoryException e){
+            return new ResponseEntity<>(
+                    ApiResponse.builder()
+                            .codeMessage(e.getMessage())
+                            .message(e.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+    @PutMapping(value = "/{orderCode}/reject")
+    public ResponseEntity<Object> rejectOrder(@PathVariable String orderCode,
+                                              HttpServletRequest request) {
+        try {
+            String authHeader = request.getHeader("Authorization");
+            orderServices.rejectOrder(orderCode,authHeader);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        } catch (InventoryException e){
+            return new ResponseEntity<>(
+                    ApiResponse.builder()
+                            .codeMessage(e.getMessage())
+                            .message(e.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
 }
