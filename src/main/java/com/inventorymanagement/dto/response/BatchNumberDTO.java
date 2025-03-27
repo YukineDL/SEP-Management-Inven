@@ -16,7 +16,6 @@ public class BatchNumberDTO {
     private LocalDate dateOfManufacture;
     private LocalDate dateOfExpiry;
     private String location;
-    private Integer inventoryQuantity;
     private Integer quantityShipped;
     private Double unitPrice;
 }

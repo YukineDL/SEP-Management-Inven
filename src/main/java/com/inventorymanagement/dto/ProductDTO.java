@@ -21,6 +21,7 @@ public class ProductDTO {
     private String categoryName;
     private String brandCode;
     private String brandName;
+    private String imagePath;
     public ProductDTO(Product product){
         this.code = StringUtils.isEmpty(product.getCode()) ? StringUtils.EMPTY : product.getCode();
         this.name = StringUtils.isEmpty(product.getName()) ? StringUtils.EMPTY : product.getName();
@@ -29,5 +30,6 @@ public class ProductDTO {
         this.sellingPrice = product.getSellingPrice();
         this.categoryCode = StringUtils.isEmpty(product.getCategoryCode()) ? StringUtils.EMPTY : product.getCategoryCode();
         this.brandCode = StringUtils.isEmpty(product.getBrandCode()) ? StringUtils.EMPTY : product.getBrandCode();
+        this.imagePath = StringUtils.isEmpty(product.getImagePath()) ? StringUtils.EMPTY : product.getImagePath();
     }
 }

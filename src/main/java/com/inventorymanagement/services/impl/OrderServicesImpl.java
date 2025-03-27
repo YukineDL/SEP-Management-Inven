@@ -42,7 +42,39 @@ public class OrderServicesImpl implements IOrderServices {
             RoleEnum.SALE.name(),
             RoleEnum.ADMIN.name()
     );
-    
+    @Override
+    public void createOrder(OrderCreateDTO dto, String authHeader) throws InventoryException {
+        Employee me = employeeService.getFullInformation(authHeader);
+        if(Objects.isNull(me) || !LIST_ORDER_ROLE.contains(me.getRoleCode())) {
+            throw new InventoryException(
+                    ExceptionMessage.NO_PERMISSION,
+                    ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
+            );
+        }
+        String orderCode = this.createCodeOrder();
+        Order order = Order.builder()
+                .code(orderCode)
+                .createAt(LocalDateTime.now())
+                .approveStatus(PURCHASE_ORDER_APPROVE.WAITING.name())
+                .deliveryStatus(Constants.WAITING_DELIVERY)
+                .customerId(dto.getCustomerId())
+                .employeeCode(dto.getEmployeeCode())
+                .totalAmount(dto.getTotalAmount())
+                .isUsed(false)
+                .build();
+        orderRepository.save(order);
+        List<OrderProduct> orderProducts = new ArrayList<>();
+        for (ProductOrderCreateDTO item : dto.getProducts()) {
+            OrderProduct orderProduct = OrderProduct.builder()
+                    .orderCode(orderCode)
+                    .productCode(item.getProductCode())
+                    .quantity(item.getQuantity())
+                    .discount(item.getDiscount())
+                    .build();
+            orderProducts.add(orderProduct);
+        }
+        orderProductRepository.saveAll(orderProducts);
+    }
     @Transactional
     @Override
     public void updateOrder(OrderCreateDTO dto, String authHeader, String code) throws InventoryException {
@@ -114,6 +146,30 @@ public class OrderServicesImpl implements IOrderServices {
     }
 
     @Override
+    public OrderDTO findOrderByCode(String orderCode) throws InventoryException {
+        Optional<Order> orderOp = orderRepository.findByCode(orderCode);
+        if(orderOp.isEmpty()){
+            throw new InventoryException(
+                    ExceptionMessage.ORDER_NOT_EXISTED,
+                    ExceptionMessage.messages.get(ExceptionMessage.ORDER_NOT_EXISTED)
+            );
+        }
+        Map<Integer, Customer> customerMap = customerRepository.findAll().stream().collect(Collectors.toMap(
+                Customer::getId, customer -> customer
+        ));
+        Map<String, Employee> employeeMap = employeeRepository.findAll().stream().collect(Collectors.toMap(
+                Employee::getCode, employee -> employee
+        ));
+        List<ProductOrderDTO> orderProductDTOS = orderProductCustomRepository.findByOrderCode(orderCode);
+        Order order = orderOp.get();
+        OrderDTO orderDTO = new OrderDTO(order);
+        orderDTO.setEmployee(employeeMap.get(order.getEmployeeCode()));
+        orderDTO.setCustomer(customerMap.get(order.getCustomerId()));
+        orderDTO.setOrderProducts(orderProductDTOS);
+        return orderDTO;
+    }
+
+    @Override
     public void rejectOrder(String orderCode, String authHeader) throws InventoryException {
         Employee me = employeeService.getFullInformation(authHeader);
         if(me == null || me.getRoleCode().contains(RoleEnum.SALE.name())){
@@ -140,5 +196,26 @@ public class OrderServicesImpl implements IOrderServices {
         order.setApproveStatus(PURCHASE_ORDER_APPROVE.REJECTED.name());
         order.setApproveDate(LocalDateTime.now());
         orderRepository.save(order);
+    }
+
+    @Override
+    public Page<OrderDTO> findBySearchRequest(OrderSearchReqDTO reqDTO, Pageable pageable) {
+        Page<OrderDTO> content = orderCustomRepository.findOrderBySearchReq(reqDTO,pageable);
+        Map<Integer, Customer> customerMap = customerRepository.findAll().stream().collect(Collectors.toMap(
+                Customer::getId, customer -> customer
+        ));
+        Map<String, Employee> employeeMap = employeeRepository.findAll().stream().collect(Collectors.toMap(
+                Employee::getCode, employee -> employee
+        ));
+        for (OrderDTO item : content.getContent()){
+            item.setEmployee(employeeMap.get(item.getEmployeeCode()));
+            item.setCustomer(customerMap.get(item.getCustomerId()));
+        }
+        return content;
+    }
+
+    private String createCodeOrder(){
+        return Constants.ORDER_CODE +
+                String.format("%05d", orderRepository.count() + 1);
     }
 }

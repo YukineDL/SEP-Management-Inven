@@ -22,4 +22,5 @@ public class InventoryException extends Exception {
     public InventoryException(String message){
         this.message = message;
     }
+
 }

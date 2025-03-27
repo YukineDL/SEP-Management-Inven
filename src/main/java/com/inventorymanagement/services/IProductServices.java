@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 public interface IProductServices {
-    void createProduct(String authHeader, ProductCreateDTO product) throws InventoryException;
-    Page<ProductDTO> findAllBySearchRequest( ProductSearchDTO searchDTO, Pageable pageable) throws InventoryException;
-    void updateProduct(String authHeader, ProductCreateDTO productCreateDTO, String productCode) throws InventoryException,IOException;
-    ProductDTO findByCode(String code) throws InventoryException;
+    void createProduct(String authHeader, ProductCreateDTO product) throws InventoryException,IOException;
+    Page<ProductDTO> findAllBySearchRequest( ProductSearchDTO searchDTO, Pageable pageable) throws InventoryException, IOException;
+    void updateProduct(String authHeader, ProductCreateDTO productCreateDTO, String productCode) throws InventoryException, IOException;
+    ProductDTO findByCode(String code) throws InventoryException, IOException;
     Page<ProductDTO> findByCategoryCode(String categoryCode, Pageable pageable);
-    List<ProductCategoryDTO> getProductsDependCategoryCode();
+    List<ProductCategoryDTO> getProductsDependCategoryCode() throws IOException;
 }

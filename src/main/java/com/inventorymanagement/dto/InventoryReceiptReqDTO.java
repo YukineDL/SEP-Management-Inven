@@ -20,4 +20,5 @@ public class InventoryReceiptReqDTO {
     private List<BatchNumberDTO> batchNumbers;
     private String purchaseOrderCode;
     private String employeeCode;
+    private Double totalAmount;
 }

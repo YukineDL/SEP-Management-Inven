@@ -18,32 +18,39 @@ public class BatchNumber {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "productCode")
+    @Column(name = "product_code")
     private String productCode;
-    @Column(name = "dateOfManufacture")
+    @Column(name = "date_of_manufacture")
     private LocalDate dateOfManufacture;
-    @Column(name = "dateExpired")
+    @Column(name = "date_expired")
     private LocalDate dateExpired;
     @Column(name = "location")
     private String location;
-    @Column(name = "inventoryQuantity")
+    @Column(name = "inventory_quantity")
     private Integer inventoryQuantity;
-    @Column(name = "quantityShipped")
+    @Column(name = "quantity_shipped")
     private Integer quantityShipped;
-    @Column(name = "inventoryReceiptCode")
+    @Column(name = "inventory_receipt_code")
     private String inventoryReceiptCode;
+    @Column(name = "status")
     private String status;
     @Column(name = "create_at")
     private LocalDate createAt;
-
     @Column(name = "export_quantity")
     private Integer exportQuantity;
+    @Column(name = "export_quantity_last")
+    private Integer exportQuantityLast;
     public BatchNumber(BatchNumberTemp temp, String inventoryReceiptCode) {
         this.productCode = temp.getProductCode();
         this.dateOfManufacture = temp.getDateOfManufacture();
+        this.dateExpired = temp.getDateExpired();
+        this.location = temp.getLocation();
+        this.inventoryQuantity = temp.getInventoryQuantity();
+        this.quantityShipped = temp.getQuantityShipped();
         this.inventoryReceiptCode = inventoryReceiptCode;
         this.createAt = LocalDate.now();
-        this.status = Constants.BATCH_NUMBER_AVAILABLE;
+        this.status = temp.getStatus();
         this.exportQuantity = 0;
+        this.exportQuantityLast = 0;
     }
 }

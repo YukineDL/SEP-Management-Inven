@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface IEmployeeServices {
     Page<Employee> getAll(String authHeader, Pageable pageable, EmployeeSearchDTO searchDTO) throws InventoryException;
-    Employee getFullInformation(String authHeader) throws InventoryException;
+    Employee getFullInformation(String authHeader);
     Employee findByCode(String authHeader, String code) throws InventoryException;
     void updateByCode(String authHeader, String employeeCode, EmployeeUpdateDTO employeeUpdateDTO) throws InventoryException;
     void lockAccount(String authHeader, String employeeCode) throws InventoryException;

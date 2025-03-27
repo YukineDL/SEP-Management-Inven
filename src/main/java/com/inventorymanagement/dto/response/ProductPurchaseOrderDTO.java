@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class ProductPurchaseOrderDTO {
     private String productCode;
     private Integer quantity;
+
 }

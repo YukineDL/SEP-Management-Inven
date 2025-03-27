@@ -1,11 +1,11 @@
-package com.inventorymanagement.repository.custom;
+package com.inventorymanagement.repository.custom.impl;
 
 import com.inventorymanagement.dto.EmployeeSearchDTO;
 import com.inventorymanagement.entity.Employee;
+import com.inventorymanagement.repository.custom.EmployeeRepositoryCustom;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Repository
-public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom{
+public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
     @Override

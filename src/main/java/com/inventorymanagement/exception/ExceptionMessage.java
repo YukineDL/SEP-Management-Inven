@@ -31,6 +31,18 @@ public class ExceptionMessage {
     public static String PURCHASE_ORDER_STATUS_INCORRECT = "PURCHASE_ORDER_STATUS_INCORRECT";
     public static String PURCHASE_ORDER_APPROVED = "PURCHASE_ORDER_APPROVED";
     public static String INVALID_CREATE_INVENTORY_RECEIPT = "INVALID_CREATE_INVENTORY_RECEIPT";
+    public static String INVENTORY_RECEIPT_NOT_EXISTED = "INVENTORY_RECEIPT_NOT_EXISTED";
+    public static String INVENTORY_RECEIPT_NOT_APPROVE = "INVENTORY_RECEIPT_NOT_APPROVE";
+    public static String INVENTORY_RECEIPT_APPROVE = "INVENTORY_RECEIPT_APPROVE";
+    public static String CUSTOMER_PHONE_EXISTED = "CUSTOMER_PHONE_EXISTED";
+    public static String CUSTOMER_NOT_EXISTED = "CUSTOMER_NOT_EXISTED";
+    public static String ORDER_NOT_EXISTED = "ORDER_NOT_EXISTED";
+    public static String ORDER_APPROVED = "ORDER_APPROVED";
+    public static String ORDER_REJECT = "ORDER_REJECT";
+    public static String PRODUCT_NOT_ENOUGH = "PRODUCT_NOT_ENOUGH";
+    public static String ORDER_APPROVE_STATUS_INVALID = "ORDER_APPROVE_STATUS_INVALID";
+    public static String ORDER_IS_USED = "ORDER_IS_USED";
+    public static String INVENTORY_DELIVERY_NOT_EXISTED = "INVENTORY_DELIVERY_NOT_EXISTED";
 
     static {
         messages.put(EXISTED_EMPLOYEE, "Nhân viên đã tồn tại");
@@ -59,5 +71,16 @@ public class ExceptionMessage {
         messages.put(PURCHASE_ORDER_STATUS_INCORRECT, "Đơn hàng chưa được duyệt hoặc đã bị từ chối");
         messages.put(PURCHASE_ORDER_APPROVED, "Đơn mua hàng đã được phê duyệt ");
         messages.put(INVALID_CREATE_INVENTORY_RECEIPT, "Đang có phiếu nhập tồn tại với phiếu mua hàng này, không thể tạo mới");
+        messages.put(INVENTORY_RECEIPT_NOT_APPROVE,"Phiếu chưa được duyệt hoặc đã bị từ chối");
+        messages.put(INVENTORY_RECEIPT_APPROVE, "Phiếu đã được duyệt không thể từ chối");
+        messages.put(CUSTOMER_PHONE_EXISTED, "Số điện thoại đã tồn tại");
+        messages.put(CUSTOMER_NOT_EXISTED, "Khách này không tồn tại");
+        messages.put(ORDER_NOT_EXISTED, "Đơn hàng không tồn tại");
+        messages.put(ORDER_APPROVED, "Đơn hàng đã được duyệt không thể cập nhật");
+        messages.put(ORDER_REJECT, "Đơn hàng đã bị từ chối ");
+        messages.put(PRODUCT_NOT_ENOUGH, " %s không đủ số lượng để xuất theo hóa đơn");
+        messages.put(ORDER_APPROVE_STATUS_INVALID, "Đơn hàng chưa được duyệt hoặc đã bị từ chối");
+        messages.put(ORDER_IS_USED, "Đơn hàng đã được sử dụng cho phiếu xuất");
+        messages.put(INVENTORY_RECEIPT_NOT_EXISTED, "Phiếu xuất không tồn tại");
     }
 }

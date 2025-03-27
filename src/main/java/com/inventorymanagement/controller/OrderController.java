@@ -1,8 +1,10 @@
 package com.inventorymanagement.controller;
 
+import com.inventorymanagement.dto.OrderCreateDTO;
 import com.inventorymanagement.dto.OrderSearchReqDTO;
 import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.InventoryException;
+import com.inventorymanagement.services.IOrderServices;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cglib.core.Local;
@@ -49,35 +51,6 @@ public class OrderController {
                     HttpStatus.BAD_REQUEST
             );
         }
-    }
-  
-    
-   
-    @GetMapping(value = "/find-all")
-    public ResponseEntity<Object> findAllBySearchRequest(@RequestParam(required = false) String code,
-                                                         @RequestParam(required = false) String approveStatus,
-                                                         @RequestParam(required = false) String deliveryStatus,
-                                                         @RequestParam(required = false) String employeeCode,
-                                                         @RequestParam(required = false) String phoneNumber,
-                                                         @RequestParam(required = false) LocalDate fromDate,
-                                                         @RequestParam(required = false) LocalDate toDate,
-                                                         @RequestParam(required = false) Double totalAmountTo,
-                                                         @RequestParam(required = false) Double totalAmountFrom,
-                                                         @RequestParam(name = "page", defaultValue = "0") int page,
-                                                         @RequestParam(name = "size", defaultValue = "10")int size){
-        OrderSearchReqDTO reqDTO = OrderSearchReqDTO.builder()
-                .code(code)
-                .customerPhoneNumber(phoneNumber)
-                .approveStatus(approveStatus)
-                .deliveryStatus(deliveryStatus)
-                .employeeCode(employeeCode)
-                .fromDate(fromDate)
-                .toDate(toDate)
-                .totalAmountTo(totalAmountTo)
-                .totalAmountFrom(totalAmountFrom)
-                .build();
-        Pageable pageable = PageRequest.of(page,size);
-        return new ResponseEntity<>(orderServices.findBySearchRequest(reqDTO,pageable),HttpStatus.OK);
     }
     @PutMapping(value = "/{orderCode}/update")
     public ResponseEntity<Object> updateByCode(@PathVariable String orderCode,
@@ -127,5 +100,31 @@ public class OrderController {
                     HttpStatus.BAD_REQUEST
             );
         }
+    }
+    @GetMapping(value = "/find-all")
+    public ResponseEntity<Object> findAllBySearchRequest(@RequestParam(required = false) String code,
+                                                         @RequestParam(required = false) String approveStatus,
+                                                         @RequestParam(required = false) String deliveryStatus,
+                                                         @RequestParam(required = false) String employeeCode,
+                                                         @RequestParam(required = false) String phoneNumber,
+                                                         @RequestParam(required = false) LocalDate fromDate,
+                                                         @RequestParam(required = false) LocalDate toDate,
+                                                         @RequestParam(required = false) Double totalAmountTo,
+                                                         @RequestParam(required = false) Double totalAmountFrom,
+                                                         @RequestParam(name = "page", defaultValue = "0") int page,
+                                                         @RequestParam(name = "size", defaultValue = "10")int size){
+        OrderSearchReqDTO reqDTO = OrderSearchReqDTO.builder()
+                .code(code)
+                .customerPhoneNumber(phoneNumber)
+                .approveStatus(approveStatus)
+                .deliveryStatus(deliveryStatus)
+                .employeeCode(employeeCode)
+                .fromDate(fromDate)
+                .toDate(toDate)
+                .totalAmountTo(totalAmountTo)
+                .totalAmountFrom(totalAmountFrom)
+                .build();
+        Pageable pageable = PageRequest.of(page,size);
+        return new ResponseEntity<>(orderServices.findBySearchRequest(reqDTO,pageable),HttpStatus.OK);
     }
 }

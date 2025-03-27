@@ -37,6 +37,8 @@ public class Product {
     private LocalDateTime createAt;
     @Column(name = "create_by")
     private String createBy;
+    @Column(name = "image_path")
+    private String imagePath;
 
     public void updateProduct(ProductCreateDTO dto){
         this.name = dto.getProductName();

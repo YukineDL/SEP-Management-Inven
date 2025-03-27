@@ -1,7 +1,8 @@
-package com.inventorymanagement.repository.custom;
+package com.inventorymanagement.repository.custom.impl;
 
 import com.inventorymanagement.dto.ProductDTO;
 import com.inventorymanagement.dto.ProductSearchDTO;
+import com.inventorymanagement.repository.custom.ProductRepositoryCustom;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Repository
 public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
@@ -23,8 +23,12 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     @Override
     public Page<ProductDTO> findAllBySearchRequest(ProductSearchDTO productSearchDTO, Pageable pageable) {
         StringBuilder sql = new StringBuilder();
+        StringBuilder selectSQL = new StringBuilder();
         Map<String, Object> parameters = new HashMap<>();
-        sql.append(""" 
+        StringBuilder whereSQL = new StringBuilder();
+        StringBuilder limitSQL = new StringBuilder();
+        StringBuilder orderBySql = new StringBuilder();
+        selectSQL.append(""" 
                 select p.code
                                 ,p.name
                                 ,p.unit
@@ -33,20 +37,36 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                                 ,p.category_code
                                 ,c.name
                                 ,p.brand_code
-                                ,b.name from product p
+                                ,b.name
+                                ,p.image_path
+                """);
+        whereSQL.append("""
+                from product p
                                 join brand b on b.code = p.brand_code
                                 join category c on c.code = p.category_code where 1=1
                 """);
-        addingWhereClause(sql,productSearchDTO,parameters);
-        Query countQuery = entityManager.createNativeQuery(sql.toString());
+        orderBySql.append("""
+                order by p.create_at desc
+                """);
+        StringBuilder countSql = new StringBuilder();
+        countSql.append("""
+                SELECT COUNT(1)
+                """);
+        addingWhereClause(whereSQL,productSearchDTO,parameters);
+        addingPageQuery(limitSQL,pageable);
+        sql.append(selectSQL)
+                .append(whereSQL)
+                .append(orderBySql)
+                .append(limitSQL);
+        countSql.append(whereSQL);
+        Query countQuery = entityManager.createNativeQuery(countSql.toString());
         setParameters(parameters,countQuery);
-        addingPageQuery(sql,pageable);
         Query query = entityManager.createNativeQuery(sql.toString(),ProductDTO.class);
         setParameters(parameters,query);
 
         var results = query.getResultList();
-        var counts = countQuery.getResultList();
-        return new PageImpl<>(results,pageable,counts.size());
+        Long counts = (Long)countQuery.getSingleResult();
+        return new PageImpl<>(results,pageable,counts);
     }
     private void addingWhereClause(StringBuilder sql, ProductSearchDTO productSearchDTO, Map<String, Object> parameters) {
         if(StringUtils.isNotBlank(productSearchDTO.getCode())) {
@@ -58,11 +78,11 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                     .append("'%").append(productSearchDTO.getName()).append("%'");
         }
         if(StringUtils.isNotBlank(productSearchDTO.getCategoryCode())){
-            sql.append(" and p.category_code = :categoryCode");
+            sql.append(" and p.category_code = :categoryCode ");
             parameters.put("categoryCode", productSearchDTO.getCategoryCode());
         }
         if(StringUtils.isNotBlank(productSearchDTO.getBrandCode())){
-            sql.append(" and p.brand_code = :brandCode");
+            sql.append(" and p.brand_code = :brandCode ");
             parameters.put("brandCode", productSearchDTO.getBrandCode());
         }
     }

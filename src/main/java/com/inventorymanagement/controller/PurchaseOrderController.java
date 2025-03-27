@@ -98,13 +98,23 @@ public class PurchaseOrderController {
                                                       @RequestParam(required = false) String deliveryStatus,
                                                       @RequestParam(name = "page", defaultValue = "0") int page,
                                                       @RequestParam(name = "size", defaultValue = "10") int size,
-                                                      @RequestParam(required = false) LocalDate createAt){
+                                                      @RequestParam(required = false) LocalDate createAt,
+                                                      @RequestParam(required = false) LocalDate deliveryDate,
+                                                      @RequestParam(required = false) Integer supplierId,
+                                                      @RequestParam(required = false) String code,
+                                                      @RequestParam(required = false) LocalDate fromDate,
+                                                      @RequestParam(required = false) LocalDate toDate){
         try {
             PurchaseOrderReqDTO searchDTO = PurchaseOrderReqDTO.builder()
                     .approveStatus(approveStatus)
                     .deliveryStatus(deliveryStatus)
                     .pageable(PageRequest.of(page,size))
                     .createAt(createAt)
+                    .deliveryDate(deliveryDate)
+                    .supplierId(supplierId)
+                    .fromDate(fromDate)
+                    .toDate(toDate)
+                    .code(code)
                     .build();
             return new ResponseEntity<>(
                     purchaseOrderServices.findBySearchRequest(searchDTO),
@@ -123,8 +133,8 @@ public class PurchaseOrderController {
     public ResponseEntity<Object> updatePurchaseOrderCodeByCode(@PathVariable String purchaseOrderCode,
                                                                 @RequestBody PurchaseOrderCreateDTO dto){
         try {
+            purchaseOrderServices.updatePurchaseOrder(dto, purchaseOrderCode);
             return new ResponseEntity<>(
-                    purchaseOrderServices.updatePurchaseOrder(dto, purchaseOrderCode),
                     HttpStatus.ACCEPTED
             );
         } catch (InventoryException exception){

@@ -1,20 +1,18 @@
-package com.inventorymanagement.repository.custom;
+package com.inventorymanagement.repository.custom.impl;
 
 import com.inventorymanagement.dto.PurchaseOrderReqDTO;
 import com.inventorymanagement.dto.response.PurchaseOrderDTO;
-import com.inventorymanagement.entity.PurchaseOrder;
+import com.inventorymanagement.repository.custom.PurchaseOrderCustomRepository;
 import com.inventorymanagement.utils.RepositoryUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -22,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 @Slf4j
-public class PurchaseOrderCustomRepositoryImpl implements PurchaseOrderCustomRepository{
+public class PurchaseOrderCustomRepositoryImpl implements PurchaseOrderCustomRepository {
     @PersistenceContext
     private EntityManager em;
     @Override
@@ -32,6 +30,7 @@ public class PurchaseOrderCustomRepositoryImpl implements PurchaseOrderCustomRep
         StringBuilder selectSQL = new StringBuilder();
         StringBuilder whereSQL = new StringBuilder();
         StringBuilder pageSQl = new StringBuilder();
+        StringBuilder orderSql = new StringBuilder();
         selectSQL.append("""
                 SELECT po.code, po.approve, po.delivery_status, po.delivery_date, po.create_at,
                 po.employee_code, e.name,
@@ -47,8 +46,12 @@ public class PurchaseOrderCustomRepositoryImpl implements PurchaseOrderCustomRep
                 """);
         addingWhereClause(searchReq, whereSQL, params);
         addingPaging(searchReq,pageSQl);
+        orderSql.append("""
+                order by po.create_at_date_time desc
+                """);
         sql.append(selectSQL)
                 .append(whereSQL)
+                .append(orderSql)
                 .append(pageSQl);
         String countAll = """
                 SELECT COUNT(1)
@@ -136,10 +139,10 @@ public class PurchaseOrderCustomRepositoryImpl implements PurchaseOrderCustomRep
             params.put("fromDate",reqDTO.getFromDate());
             params.put("toDate",reqDTO.getToDate());
         }else if(!Objects.isNull(reqDTO.getFromDate())){
-            sqlWhere.append(" and ( po.create_at >= :fromDate and po.create_at <= CURRENT_DATE )");
+            sqlWhere.append(" and po.create_at >= :fromDate ");
             params.put("fromDate",reqDTO.getFromDate());
         }else if(!Objects.isNull(reqDTO.getToDate())){
-            sqlWhere.append(" and (po.create_at >= CURRENT_DATE and po.create_at <= :toDate)");
+            sqlWhere.append(" and po.create_at <= :toDate");
             params.put("toDate",reqDTO.getToDate());
         }
         if(!Objects.isNull(reqDTO.getIsUsed())){

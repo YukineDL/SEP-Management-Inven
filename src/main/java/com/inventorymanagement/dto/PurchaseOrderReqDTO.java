@@ -13,8 +13,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class PurchaseOrderReqDTO {
+    private String code;
     private String approveStatus;
     private String deliveryStatus;
     private LocalDate createAt;
     private Pageable pageable;
+    private Integer supplierId;
+    private LocalDate deliveryDate;
+    private LocalDate fromDate;
+    private LocalDate toDate;
+    private Boolean isUsed;
 }

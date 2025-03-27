@@ -21,6 +21,8 @@ public class Constants {
     public static String PRODUCT_PREFIX_CODE = "SKU-";
     public static String PURCHASE_ORDER_CODE = "PU";
     public static String INVENTORY_RECEIPT_CODE = "IR";
+    public static String INVENTORY_DELIVERY_CODE = "ID";
+    public static String ORDER_CODE = "OR";
     public static String FAIL = "FAIL";
     public static String SUCCESS = "SUCCESS";
     public static String PROCESSING = "PROCESSING";

@@ -7,7 +7,7 @@ import com.inventorymanagement.exception.ExceptionMessage;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.repository.*;
 import com.inventorymanagement.repository.custom.InventoryDeliveryCustomRepository;
-import com.inventorymanagement.repository.custom.impl.InventoryDeliveryCustomRepositoryImpl;
+import com.inventorymanagement.repository.custom.ProductDeliveryCustomRepository;
 import com.inventorymanagement.services.IEmployeeServices;
 import com.inventorymanagement.services.IInventoryDeliveryServices;
 import com.inventorymanagement.services.IOrderServices;

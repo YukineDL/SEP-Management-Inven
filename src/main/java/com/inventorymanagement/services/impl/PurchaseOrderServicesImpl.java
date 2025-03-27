@@ -4,6 +4,7 @@ import com.inventorymanagement.constant.Constants;
 import com.inventorymanagement.constant.PURCHASE_ORDER_APPROVE;
 import com.inventorymanagement.dto.*;
 import com.inventorymanagement.dto.response.ProductPurchaseOrderDTO;
+import com.inventorymanagement.dto.response.PurchaseOrderDTO;
 import com.inventorymanagement.entity.*;
 import com.inventorymanagement.exception.ExceptionMessage;
 import com.inventorymanagement.exception.InventoryException;
@@ -22,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -52,6 +50,7 @@ public class PurchaseOrderServicesImpl implements IPurchaseOrderServices {
                 .supplierId(supplier.getId())
                 .deliveryDate(dto.getDeliveryDate())
                 .createAt(LocalDate.now())
+                .createAtDateTime(LocalDateTime.now())
                 .build();
         purchaseOrderRepository.save(purchaseOrder);
         // start sync
@@ -66,6 +65,7 @@ public class PurchaseOrderServicesImpl implements IPurchaseOrderServices {
                 () -> {
                     var processCheck = processCheckRepository.findByCheckSync(key).get();
                     try {
+                        int totalQuantity = 0;
                         List<ProductPurchaseOrder> allProducts = new ArrayList<>();
                         for(ProductPurchaseOrderDTO item : dto.getProducts()) {
                             ProductPurchaseOrder product = ProductPurchaseOrder.builder()
@@ -74,8 +74,11 @@ public class PurchaseOrderServicesImpl implements IPurchaseOrderServices {
                                     .quantity(item.getQuantity())
                                     .build();
                             allProducts.add(product);
+                            totalQuantity += item.getQuantity();
                         }
                         productPurchaseOrderRepository.saveAll(allProducts);
+                        purchaseOrder.setTotalQuantity(totalQuantity);
+                        purchaseOrderRepository.save(purchaseOrder);
                         processCheck.setStatus(Constants.SUCCESS);
                         processCheckRepository.save(processCheck);
                     } catch (Exception e){
@@ -90,6 +93,7 @@ public class PurchaseOrderServicesImpl implements IPurchaseOrderServices {
     @Override
     public void approvePurchaseOrder(String authHeader, String purchaseCode, String approveStatus) throws InventoryException {
         checkPermission(authHeader);
+        Employee me = employeeServices.getFullInformation(authHeader);
         Optional<PurchaseOrder> purchaseOrderOp = purchaseOrderRepository.findByCode(purchaseCode);
         if(purchaseOrderOp.isEmpty()){
             throw new InventoryException(
@@ -99,12 +103,15 @@ public class PurchaseOrderServicesImpl implements IPurchaseOrderServices {
         }
         PurchaseOrder purchaseOrder = purchaseOrderOp.get();
         purchaseOrder.setApprove(approveStatus);
+        purchaseOrder.setUsername(me.getName());
+        purchaseOrder.setActionTime(LocalDateTime.now());
         purchaseOrderRepository.save(purchaseOrder);
     }
 
     @Override
     public void receivePurchaseOrder(String authHeader, String purchaseCode) throws InventoryException {
         checkPermission(authHeader);
+        Employee me = employeeServices.getFullInformation(authHeader);
         Optional<PurchaseOrder> purchaseOrderOp = purchaseOrderRepository.findByCode(purchaseCode);
         if(purchaseOrderOp.isEmpty()){
             throw new InventoryException(
@@ -123,6 +130,7 @@ public class PurchaseOrderServicesImpl implements IPurchaseOrderServices {
             );
         }
         purchaseOrder.setDeliveryStatus(Constants.RECEIVE_DELIVERY);
+        purchaseOrder.setDeliveryAt(LocalDateTime.now());
         purchaseOrderRepository.save(purchaseOrder);
     }
 
@@ -147,64 +155,53 @@ public class PurchaseOrderServicesImpl implements IPurchaseOrderServices {
                 .approve(purchaseOrder.getApprove())
                 .deliveryStatus(purchaseOrder.getDeliveryStatus())
                 .deliveryDate(purchaseOrder.getDeliveryDate())
+                .createAt(purchaseOrder.getCreateAt())
+                .actionTime(purchaseOrder.getActionTime())
+                .username(purchaseOrder.getUsername())
+                .createAtDateTime(purchaseOrder.getCreateAtDateTime())
+                .deliveryAt(purchaseOrder.getDeliveryAt())
+                .totalQuantity(purchaseOrder.getTotalQuantity())
                 .build();
     }
 
     @Override
-    public Page<PurchaseOrder> findBySearchRequest(PurchaseOrderReqDTO reqDTO) {
+    public Page<PurchaseOrderDTO> findBySearchRequest(PurchaseOrderReqDTO reqDTO) {
         return purchaseOrderCustomRepository.findBySearchRequest(reqDTO);
     }
     @Transactional
     @Override
-    public String updatePurchaseOrder(PurchaseOrderCreateDTO createDTO, String purchaseOrderCode) throws InventoryException {
+    public void updatePurchaseOrder(PurchaseOrderCreateDTO createDTO, String purchaseOrderCode) throws InventoryException {
         Optional<PurchaseOrder> purchaseOrderOP = purchaseOrderRepository.findByCode(purchaseOrderCode);
-        if(purchaseOrderOP.isEmpty()){
+        if (purchaseOrderOP.isEmpty()) {
             throw new InventoryException(
                     ExceptionMessage.PURCHASE_ORDER_NOT_EXIST,
                     ExceptionMessage.messages.get(ExceptionMessage.PURCHASE_ORDER_NOT_EXIST)
             );
         }
         PurchaseOrder purchaseOrder = purchaseOrderOP.get();
-        if(StringUtils.equals(purchaseOrder.getApprove(),PURCHASE_ORDER_APPROVE.APPROVED.name())){
+        if (StringUtils.equals(purchaseOrder.getApprove(), PURCHASE_ORDER_APPROVE.APPROVED.name())) {
             throw new InventoryException(
                     ExceptionMessage.PURCHASE_ORDER_APPROVED,
                     ExceptionMessage.messages.get(ExceptionMessage.PURCHASE_ORDER_APPROVED));
         }
-        EmployeeDTO employee = employeeServices.findByCode(createDTO.getEmployeeCode());
         Supplier supplier = supplierServices.findById(createDTO.getSupplierId());
-        purchaseOrder.setEmployeeCode(employee.getCode());
         purchaseOrder.setSupplierId(supplier.getId());
+        purchaseOrder.setDeliveryDate(createDTO.getDeliveryDate());
 
         // clear all data product purchase before adding new data
         productPurchaseOrderRepository.deleteByPurchaseOrderCode(purchaseOrder.getCode());
-        String key = UUID.randomUUID().toString();
-        ProcessCheck process = ProcessCheck.builder()
-                .checkSync(key)
-                .status(Constants.PROCESSING)
-                .createAt(LocalDateTime.now())
-                .build();
-        processCheckRepository.save(process);
-        CompletableFuture.runAsync(() -> {
-            try {
-                List<ProductPurchaseOrder> allProducts = new ArrayList<>();
-                for(ProductPurchaseOrderDTO item : createDTO.getProducts()) {
-                    ProductPurchaseOrder product = ProductPurchaseOrder.builder()
-                            .productCode(item.getProductCode())
-                            .purchaseOrderCode(purchaseOrder.getCode())
-                            .quantity(item.getQuantity())
-                            .build();
-                    allProducts.add(product);
-                }
-                productPurchaseOrderRepository.saveAll(allProducts);
-                process.setStatus(Constants.SUCCESS);
-                processCheckRepository.save(process);
-            } catch (Exception e){
-                log.info(e.getMessage());
-                process.setStatus(Constants.FAIL);
-                processCheckRepository.save(process);
-            }
-        });
-        return key;
+
+        List<ProductPurchaseOrder> allProducts = new ArrayList<>();
+        for (ProductPurchaseOrderDTO item : createDTO.getProducts()) {
+            ProductPurchaseOrder product = ProductPurchaseOrder.builder()
+                    .productCode(item.getProductCode())
+                    .purchaseOrderCode(purchaseOrder.getCode())
+                    .quantity(item.getQuantity())
+                    .build();
+            allProducts.add(product);
+        }
+        productPurchaseOrderRepository.saveAll(allProducts);
+        purchaseOrderRepository.save(purchaseOrder);
     }
 
     private void checkPermission(String authHeader) throws InventoryException {

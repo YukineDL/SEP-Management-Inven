@@ -37,6 +37,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
                 || url.contains(Constants.PRODUCT_PATH)
                 || url.matches(Constants.PRODUCT_PATH_CODE)
                 || url.matches(Constants.PRODUCT_PATH_CATEGORY)
-                || url.contains(Constants.PRODUCT_DEPEND_CATEGORY_PATH);
+                || url.contains(Constants.PRODUCT_DEPEND_CATEGORY_PATH)
+                || url.contains("/upload");
     }
 }

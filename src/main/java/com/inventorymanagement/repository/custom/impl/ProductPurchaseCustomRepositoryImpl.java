@@ -1,6 +1,7 @@
-package com.inventorymanagement.repository.custom;
+package com.inventorymanagement.repository.custom.impl;
 
 import com.inventorymanagement.dto.ProductPurchaseDTO;
+import com.inventorymanagement.repository.custom.ProductPurchaseCustomRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;

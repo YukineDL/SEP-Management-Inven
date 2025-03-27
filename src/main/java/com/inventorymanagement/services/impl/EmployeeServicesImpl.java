@@ -15,7 +15,6 @@ import com.inventorymanagement.services.IEmployeeServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -49,7 +48,7 @@ public class EmployeeServicesImpl implements IEmployeeServices {
     }
 
     @Override
-    public Employee getFullInformation(String authHeader) throws InventoryException {
+    public Employee getFullInformation(String authHeader){
         String token = securityUtils.decode(authHeader);
         SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS256");
 
@@ -60,13 +59,7 @@ public class EmployeeServicesImpl implements IEmployeeServices {
         Jwt jwt = nimbusJwtDecoder.decode(token);
         Long employeeId = (Long) jwt.getClaims().get("employee_id");
         Optional<Employee> employee = employeeRepository.findById(Math.toIntExact(employeeId));
-        if(employee.isEmpty()){
-            throw new InventoryException(
-                    ExceptionMessage.EMPLOYEE_NOT_EXISTED,
-                    ExceptionMessage.messages.get(ExceptionMessage.EMPLOYEE_NOT_EXISTED)
-            );
-        }
-        return employee.get();
+        return employee.orElse(null);
     }
 
     @Override

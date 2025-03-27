@@ -2,6 +2,7 @@ package com.inventorymanagement.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "product_delivery")
 public class ProductDelivery {
     @Id
@@ -20,4 +22,6 @@ public class ProductDelivery {
     private String inventoryDeliveryCode;
     @Column(name = "export_quantity")
     private Integer exportQuantity;
+    @Column(name = "price_export")
+    private Double priceExport;
 }
