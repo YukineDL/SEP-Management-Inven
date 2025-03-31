@@ -81,8 +81,8 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
         // get product in order
         List<OrderProduct> orderProducts = orderProductRepository.findByOrderCode(orderCode);
         List<String> orderProductCodes = orderProducts.stream().map(OrderProduct::getProductCode).toList();
-        List<BatchNumber> inventoryProducts = batchNumberRepository.findByProductCodeInAndStatusOrderByCreateAtAsc(orderProductCodes,
-                PRODUCT_STATUS.NEW.name());
+        List<BatchNumber> inventoryProducts = batchNumberRepository.findProductByStatusInAndProductCodeIn(orderProductCodes,
+                List.of(PRODUCT_STATUS.NEW.name(),PRODUCT_STATUS.OLD.name()));
         Map<String, List<BatchNumber>> productInventoryMap = inventoryProducts.stream().collect(
                 Collectors.groupingBy(BatchNumber::getProductCode)
         );
@@ -155,13 +155,14 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
                batchNumberRepository.saveAll(listBatchNumberChange);
                List<ProductDelivery> itemExportDelivery = new ArrayList<>();
                for (BatchNumber batch : listBatchNumberChange){
+                   var exportQuantity = batch.getExportQuantity() - batch.getExportQuantityLast();
                    var discount = productWithDiscount.get(batch.getProductCode());
                    var product = mapProduct.get(batch.getProductCode());
-                   var priceExport = (product.getSellingPrice() * batch.getExportQuantity()) - (product.getSellingPrice() * batch.getExportQuantity() * discount) ;
+                   var priceExport = (product.getSellingPrice() * exportQuantity) - (product.getSellingPrice() * exportQuantity * discount) ;
                    ProductDelivery item = ProductDelivery.builder()
                            .inventoryDeliveryCode(inventoryDelivery.getCode())
                            .batchNumberId(batch.getId())
-                           .exportQuantity(batch.getExportQuantity() - batch.getExportQuantityLast())
+                           .exportQuantity(exportQuantity)
                            .priceExport(Math.ceil(priceExport))
                            .build();
                    itemExportDelivery.add(item);

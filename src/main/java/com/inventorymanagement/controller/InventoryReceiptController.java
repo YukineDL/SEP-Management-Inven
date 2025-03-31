@@ -2,6 +2,7 @@ package com.inventorymanagement.controller;
 
 import com.inventorymanagement.dto.InventoryReceiptReqDTO;
 import com.inventorymanagement.dto.InventoryReceiptSearchReq;
+import com.inventorymanagement.dto.InventoryReturnCreateDTO;
 import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.IInventoryReceiptServices;
@@ -131,6 +132,24 @@ public class InventoryReceiptController {
             return new ResponseEntity<>(
                     inventoryReceiptServices.findByCode(inventoryReceiptCode),
                     HttpStatus.OK);
+        } catch (InventoryException e){
+            return new ResponseEntity<>(
+                    ApiResponse.builder()
+                            .codeMessage(e.getCodeMessage())
+                            .message(e.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+    @PostMapping(value = "/{returnFormCode}/return-form")
+    public ResponseEntity<Object> importReturnForm(@PathVariable String returnFormCode,
+                                                   HttpServletRequest request,
+                                                   @RequestBody InventoryReturnCreateDTO dto){
+        try {
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            inventoryReceiptServices.importReturnFormInventoryReceipt(authHeader,returnFormCode,dto);
+            return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (InventoryException e){
             return new ResponseEntity<>(
                     ApiResponse.builder()

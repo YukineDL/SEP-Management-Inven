@@ -19,4 +19,5 @@ public interface IOrderServices {
     OrderDTO findOrderByCode(String orderCode) throws InventoryException;
     void rejectOrder(String orderCode, String authHeader) throws InventoryException;
     Page<OrderDTO> findBySearchRequest(OrderSearchReqDTO reqDTO, Pageable pageable);
+    void deliveryStatusOrder(String orderCode, String authHeader) throws InventoryException;
 }

@@ -3,10 +3,8 @@ package com.inventorymanagement.services.impl;
 import com.inventorymanagement.constant.Constants;
 import com.inventorymanagement.constant.PRODUCT_STATUS;
 import com.inventorymanagement.constant.PURCHASE_ORDER_APPROVE;
-import com.inventorymanagement.dto.InventoryReceiptDTO;
-import com.inventorymanagement.dto.InventoryReceiptReqDTO;
-import com.inventorymanagement.dto.InventoryReceiptResDTO;
-import com.inventorymanagement.dto.InventoryReceiptSearchReq;
+import com.inventorymanagement.constant.RoleEnum;
+import com.inventorymanagement.dto.*;
 import com.inventorymanagement.dto.response.BatchNumberDTO;
 import com.inventorymanagement.entity.*;
 import com.inventorymanagement.exception.ExceptionMessage;
@@ -17,8 +15,10 @@ import com.inventorymanagement.repository.custom.IBatchNumberCustomRepository;
 import com.inventorymanagement.repository.custom.InventoryReceiptCustomRepository;
 import com.inventorymanagement.services.IEmployeeServices;
 import com.inventorymanagement.services.IInventoryReceiptServices;
+import com.inventorymanagement.services.IReturnFormServices;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +46,8 @@ public class InventoryReceiptServicesImpl implements IInventoryReceiptServices {
     private final IBatchNumberCustomRepository batchNumberCustomRepository;
     private final BatchNumberTempCustomRepository batchNumberTempCustomRepository;
     private final EmployeeRepository employeeRepository;
+    private final IReturnFormServices returnFormServices;
+    private final ReturnFormRepository returnFormRepository;
     @Override
     public String createReceipt(InventoryReceiptReqDTO receiptReqDTO) throws InventoryException {
         List<String> statusApprove = List.of(PURCHASE_ORDER_APPROVE.APPROVED.name(),
@@ -255,6 +257,47 @@ public class InventoryReceiptServicesImpl implements IInventoryReceiptServices {
         inventoryReceipt.setTotalAmount(dto.getTotalAmount());
         inventoryReceipt.setTotalQuantity(totalQuantity);
         batchNumberTempRepository.saveAll(batchNumberTemps);
+    }
+
+    @Override
+    public void importReturnFormInventoryReceipt(String authHeader,String returnFormCode, InventoryReturnCreateDTO receiptReqDTO) throws InventoryException {
+        Employee me = employeeServices.getFullInformation(authHeader);
+        if(me == null || me.getRoleCode().equals(RoleEnum.SALE.name())){
+            throw new InventoryException(
+                    ExceptionMessage.NO_PERMISSION,
+                    ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
+            );
+        }
+        ReturnFormDTO returnFormDTO = returnFormServices.findReturnForm(returnFormCode);
+        if(BooleanUtils.isTrue(returnFormDTO.getReturnForm().getIsUsed())){
+            throw new InventoryException(
+                    ExceptionMessage.RETURN_FORM_IS_USED,
+                    ExceptionMessage.messages.get(ExceptionMessage.RETURN_FORM_IS_USED)
+            );
+        }
+        var totalQuantityReturn = returnFormDTO.getReturnProducts().stream().mapToInt(ReturnProductDTO::getQuantityReturn).sum();
+        InventoryReceipt inventoryReceipt = InventoryReceipt.builder()
+                .code(createCode())
+                .employeeCode(receiptReqDTO.getEmployeeCode())
+                .totalQuantity(totalQuantityReturn)
+                .totalAmount(receiptReqDTO.getTotalAmount())
+                .accountingDate(receiptReqDTO.getAccountingDate())
+                .documentDate(receiptReqDTO.getDocumentDate())
+                .approve(PURCHASE_ORDER_APPROVE.APPROVED.name())
+                .statusImport(Constants.STATUS_IMPORT_SUCCESS)
+                .createAt(LocalDate.now())
+                .createAtDateTime(LocalDateTime.now())
+                .build();
+        inventoryReceiptRepository.save(inventoryReceipt);
+        List<BatchNumber> batchNumbers = new ArrayList<>();
+        for (BatchNumberReturnDTO item : receiptReqDTO.getProductReturns()) {
+            BatchNumber batchNumber = new BatchNumber(item,inventoryReceipt.getCode());
+            batchNumbers.add(batchNumber);
+        }
+        var returnForm = returnFormDTO.getReturnForm();
+        returnForm.setIsUsed(true);
+        returnFormRepository.save(returnForm);
+        batchNumberRepository.saveAll(batchNumbers);
     }
 
     private String createCode(){

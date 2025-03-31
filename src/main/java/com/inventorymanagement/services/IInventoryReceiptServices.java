@@ -1,9 +1,6 @@
 package com.inventorymanagement.services;
 
-import com.inventorymanagement.dto.InventoryReceiptDTO;
-import com.inventorymanagement.dto.InventoryReceiptReqDTO;
-import com.inventorymanagement.dto.InventoryReceiptResDTO;
-import com.inventorymanagement.dto.InventoryReceiptSearchReq;
+import com.inventorymanagement.dto.*;
 import com.inventorymanagement.exception.InventoryException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,4 +15,5 @@ public interface IInventoryReceiptServices {
     InventoryReceiptDTO findByCode(String inventoryCode) throws InventoryException;
     @Transactional
     void updateInventoryReceipt(String inventoryReceiptCode, InventoryReceiptReqDTO dto) throws InventoryException;
+    void importReturnFormInventoryReceipt(String authHeader ,String returnFormCode, InventoryReturnCreateDTO receiptReqDTO) throws InventoryException;
 }

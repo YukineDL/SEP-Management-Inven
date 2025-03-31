@@ -214,6 +214,33 @@ public class OrderServicesImpl implements IOrderServices {
         return content;
     }
 
+    @Override
+    public void deliveryStatusOrder(String authHeader,String orderCode) throws InventoryException {
+        Employee me = employeeService.getFullInformation(authHeader);
+        if(me == null || me.getRoleCode().contains(RoleEnum.EMPLOYEE.name())){
+            throw new InventoryException(
+                    ExceptionMessage.NO_PERMISSION,
+                    ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
+            );
+        }
+        Optional<Order> orderOp = orderRepository.findByCode(orderCode);
+        if(orderOp.isEmpty()){
+            throw new InventoryException(
+                    ExceptionMessage.ORDER_NOT_EXISTED,
+                    ExceptionMessage.messages.get(ExceptionMessage.ORDER_NOT_EXISTED)
+            );
+        }
+        var order = orderOp.get();
+        if(order.getApproveStatus().equals(PURCHASE_ORDER_APPROVE.REJECTED.name())){
+            throw new InventoryException(
+                    ExceptionMessage.ORDER_REJECT,
+                    ExceptionMessage.messages.get(ExceptionMessage.ORDER_REJECT)
+            );
+        }
+        order.setDeliveryStatus(Constants.RECEIVE_DELIVERY);
+        orderRepository.save(order);
+    }
+
     private String createCodeOrder(){
         return Constants.ORDER_CODE +
                 String.format("%05d", orderRepository.count() + 1);

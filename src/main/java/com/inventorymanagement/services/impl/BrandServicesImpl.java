@@ -11,6 +11,7 @@ import com.inventorymanagement.services.IBrandServices;
 import com.inventorymanagement.services.IEmployeeServices;
 import com.inventorymanagement.utils.Utils;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -69,7 +70,6 @@ public class BrandServicesImpl implements IBrandServices {
                     ExceptionMessage.messages.get(ExceptionMessage.BRAND_NAME_EMPTY)
             );
         }
-
         Optional<Brand> brandOptional = brandRepository.findByCode(brandCode);
         if(brandOptional.isEmpty()){
             throw new InventoryException(
@@ -77,6 +77,13 @@ public class BrandServicesImpl implements IBrandServices {
                     ExceptionMessage.messages.get(ExceptionMessage.BRAND_NOT_EXISTED)
             );
         }
+        if(BooleanUtils.isTrue(brandRepository.existsByNameAndCodeNotLike(brandDTO.getBrandName(),brandCode))){
+            throw new InventoryException(
+                    ExceptionMessage.BRAND_NAME_EXISTED,
+                    ExceptionMessage.messages.get(ExceptionMessage.BRAND_NAME_EXISTED)
+            );
+        }
+
 
         Brand brand = brandOptional.get();
         brand.setName(brandDTO.getBrandName());

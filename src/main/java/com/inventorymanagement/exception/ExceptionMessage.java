@@ -43,6 +43,11 @@ public class ExceptionMessage {
     public static String ORDER_APPROVE_STATUS_INVALID = "ORDER_APPROVE_STATUS_INVALID";
     public static String ORDER_IS_USED = "ORDER_IS_USED";
     public static String INVENTORY_DELIVERY_NOT_EXISTED = "INVENTORY_DELIVERY_NOT_EXISTED";
+    public static String RETURN_FORM_NOT_EXISTED = "RETURN_FORM_NOT_EXISTED";
+    public static String RETURN_PRODUCT_OVER_ORDER = "RETURN_PRODUCT_OVER_ORDER";
+    public static String RETURN_PRODUCT_NOT_IN_ORDER = "RETURN_PRODUCT_NOT_IN_ORDER";
+    public static String RETURN_FORM_IS_USED = "RETURN_FORM_IS_USED";
+    public static String BRAND_NAME_EXISTED = "BRAND_NAME_EXISTED";
 
     static {
         messages.put(EXISTED_EMPLOYEE, "Nhân viên đã tồn tại");
@@ -82,5 +87,10 @@ public class ExceptionMessage {
         messages.put(ORDER_APPROVE_STATUS_INVALID, "Đơn hàng chưa được duyệt hoặc đã bị từ chối");
         messages.put(ORDER_IS_USED, "Đơn hàng đã được sử dụng cho phiếu xuất");
         messages.put(INVENTORY_RECEIPT_NOT_EXISTED, "Phiếu xuất không tồn tại");
+        messages.put(RETURN_FORM_NOT_EXISTED, "Đơn hoàn hàng không tồn tại");
+        messages.put(RETURN_PRODUCT_OVER_ORDER, " %s vượt quá số lượng trong đơn hàng ");
+        messages.put(RETURN_PRODUCT_NOT_IN_ORDER, "Sản phẩm không nằm trong đơn hàng");
+        messages.put(RETURN_FORM_IS_USED, "Đơn hoàn đã được áp dụng cho phiếu nhập");
+        messages.put(BRAND_NAME_EMPTY, "Tên nhãn hàng đã tồn tại");
     }
 }

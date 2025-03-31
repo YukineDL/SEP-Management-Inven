@@ -1,9 +1,8 @@
 package com.inventorymanagement.entity;
-
-import com.inventorymanagement.constant.Constants;
-import com.inventorymanagement.dto.response.BatchNumberDTO;
+import com.inventorymanagement.dto.BatchNumberReturnDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +12,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "batch_number")
 public class BatchNumber {
     @Id
@@ -40,6 +40,8 @@ public class BatchNumber {
     private Integer exportQuantity;
     @Column(name = "export_quantity_last")
     private Integer exportQuantityLast;
+    @Column(name = "import_price")
+    private Double importPrice;
     public BatchNumber(BatchNumberTemp temp, String inventoryReceiptCode) {
         this.productCode = temp.getProductCode();
         this.dateOfManufacture = temp.getDateOfManufacture();
@@ -50,7 +52,21 @@ public class BatchNumber {
         this.inventoryReceiptCode = inventoryReceiptCode;
         this.createAt = LocalDate.now();
         this.status = temp.getStatus();
+        this.importPrice = temp.getUnitPrice();
         this.exportQuantity = 0;
         this.exportQuantityLast = 0;
+    }
+    public BatchNumber(BatchNumberReturnDTO dto, String inventoryReceiptCode) {
+        this.productCode = dto.getProductCode();
+        this.dateOfManufacture = dto.getDateOfManufacture();
+        this.dateExpired = dto.getDateOfExpiry();
+        this.location = dto.getLocation();
+        this.inventoryReceiptCode = inventoryReceiptCode;
+        this.createAt = LocalDate.now();
+        this.exportQuantity = 0;
+        this.exportQuantityLast = 0;
+        this.status = dto.getStatus();
+        this.quantityShipped = dto.getQuantityReturn();
+        this.inventoryQuantity = dto.getQuantityReturn();
     }
 }

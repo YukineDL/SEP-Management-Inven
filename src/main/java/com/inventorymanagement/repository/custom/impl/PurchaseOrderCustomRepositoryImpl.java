@@ -119,15 +119,15 @@ public class PurchaseOrderCustomRepositoryImpl implements PurchaseOrderCustomRep
             params.put("deliveryStatus", reqDTO.getDeliveryStatus());
         }
         if(!Objects.isNull(reqDTO.getCreateAt())){
-            sqlWhere.append(" and po.create_at = :createAt");
+            sqlWhere.append(" and po.create_at = :createAt ");
             params.put("createAt", reqDTO.getCreateAt());
         }
         if(!Objects.isNull(reqDTO.getSupplierId())){
-            sqlWhere.append(" and po.supplier_id = :supplierId");
+            sqlWhere.append(" and po.supplier_id = :supplierId ");
             params.put("supplierId", reqDTO.getSupplierId());
         }
         if(!Objects.isNull(reqDTO.getDeliveryDate())){
-            sqlWhere.append(" and po.delivery_date = :deliveryDate");
+            sqlWhere.append(" and po.delivery_date = :deliveryDate ");
             params.put("deliveryDate", reqDTO.getDeliveryDate());
         }
         if(StringUtils.isNotEmpty(reqDTO.getCode())){
@@ -142,11 +142,11 @@ public class PurchaseOrderCustomRepositoryImpl implements PurchaseOrderCustomRep
             sqlWhere.append(" and po.create_at >= :fromDate ");
             params.put("fromDate",reqDTO.getFromDate());
         }else if(!Objects.isNull(reqDTO.getToDate())){
-            sqlWhere.append(" and po.create_at <= :toDate");
+            sqlWhere.append(" and po.create_at <= :toDate ");
             params.put("toDate",reqDTO.getToDate());
         }
         if(!Objects.isNull(reqDTO.getIsUsed())){
-            sqlWhere.append(" and po.is_used = :isUsed");
+            sqlWhere.append(" and po.is_used = :isUsed ");
             params.put("isUsed", reqDTO.getIsUsed());
         }
     }

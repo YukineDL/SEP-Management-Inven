@@ -22,7 +22,9 @@ public class Constants {
     public static String PURCHASE_ORDER_CODE = "PU";
     public static String INVENTORY_RECEIPT_CODE = "IR";
     public static String INVENTORY_DELIVERY_CODE = "ID";
+    public static String INVENTORY_SHEET_CODE = "IS";
     public static String ORDER_CODE = "OR";
+    public static String RETURN_FROM_CODE = "RF";
     public static String FAIL = "FAIL";
     public static String SUCCESS = "SUCCESS";
     public static String PROCESSING = "PROCESSING";

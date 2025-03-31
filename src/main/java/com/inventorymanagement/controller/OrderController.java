@@ -127,4 +127,21 @@ public class OrderController {
         Pageable pageable = PageRequest.of(page,size);
         return new ResponseEntity<>(orderServices.findBySearchRequest(reqDTO,pageable),HttpStatus.OK);
     }
+    @GetMapping(value = "/{orderCode}/delivery-success")
+    public ResponseEntity<Object> deliverySuccess(HttpServletRequest request,
+                                                  @PathVariable String orderCode) {
+        try {
+            String authHeader = request.getHeader("Authorization");
+            orderServices.deliveryStatusOrder(authHeader,orderCode);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        } catch (InventoryException e){
+            return new ResponseEntity<>(
+                    ApiResponse.builder()
+                            .codeMessage(e.getCodeMessage())
+                            .message(e.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
 }

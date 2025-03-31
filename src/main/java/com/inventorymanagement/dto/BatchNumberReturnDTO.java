@@ -1,4 +1,4 @@
-package com.inventorymanagement.dto.response;
+package com.inventorymanagement.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,12 +11,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BatchNumberDTO {
+public class BatchNumberReturnDTO {
     private String productCode;
     private LocalDate dateOfManufacture;
     private LocalDate dateOfExpiry;
     private String location;
-    private Integer quantityShipped;
-    private Double unitPrice;
+    private Integer quantityReturn;
     private String status;
 }

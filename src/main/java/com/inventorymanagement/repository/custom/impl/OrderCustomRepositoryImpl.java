@@ -90,7 +90,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
             params.put("approveStatus",reqDTO.getApproveStatus());
         }
         if(StringUtils.isNotEmpty(reqDTO.getDeliveryStatus())){
-            whereClause.append(" and o.deliver_status = :deliveryStatus ");
+            whereClause.append(" and o.delivery_status = :deliveryStatus ");
             params.put("deliveryStatus", reqDTO.getDeliveryStatus());
         }
         if(StringUtils.isNotEmpty(reqDTO.getEmployeeCode())){
