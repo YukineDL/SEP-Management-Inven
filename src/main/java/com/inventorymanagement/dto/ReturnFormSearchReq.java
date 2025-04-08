@@ -16,4 +16,7 @@ public class ReturnFormSearchReq {
     private LocalDate fromDate;
     private LocalDate toDate;
     private Boolean isUsed;
+    private Integer customerId;
+    private Double amountTo;
+    private Double amountFrom;
 }

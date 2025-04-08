@@ -1,6 +1,7 @@
 package com.inventorymanagement.controller;
 
 import com.inventorymanagement.constant.Constants;
+import com.inventorymanagement.constant.UnitEnum;
 import com.inventorymanagement.dto.CategoryDTO;
 import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.InventoryException;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 
 @RestController
 @RequiredArgsConstructor
@@ -79,5 +82,14 @@ public class CategoryController {
                     HttpStatus.BAD_REQUEST
             );
         }
+    }
+    @GetMapping(value = "/find/units")
+    public ResponseEntity<Object> findAllUnits(){
+        var values = Arrays.asList(UnitEnum.values());
+        var res = values.stream().map(UnitEnum::getName).toList();
+        return new ResponseEntity<>(
+                res,
+                HttpStatus.OK
+        );
     }
 }

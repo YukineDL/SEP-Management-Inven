@@ -13,4 +13,5 @@ public class ReturnFormCreateDTO {
     private String orderCode;
     private String employeeCode;
     private List<ReturnProductCreateDTO> products;
+    private Integer customerId;
 }

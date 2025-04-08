@@ -64,6 +64,18 @@ public class ReturnFormCustomRepositoryImpl extends BaseCustomRepository impleme
             sql.append(" and rf.is_used = :isUsed ");
             params.put("isUsed",req.getIsUsed());
         }
+        if(!Objects.isNull(req.getCustomerId())){
+            sql.append(" and rf.customer_id = :customerId ");
+            params.put("customerId",req.getCustomerId());
+        }
+        if(!Objects.isNull(req.getAmountFrom())){
+            sql.append(" and rf.total_amount >= :amountFrom ");
+            params.put("amountFrom",req.getAmountFrom());
+        }
+        if(!Objects.isNull(req.getAmountTo())){
+            sql.append(" and rf.total_amount <= :amountTo ");
+            params.put("amountTo",req.getAmountTo());
+        }
     }
 
 }

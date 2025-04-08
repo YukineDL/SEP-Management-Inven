@@ -83,6 +83,7 @@ public class InventoryReceiptServicesImpl implements IInventoryReceiptServices {
                 .createAtDateTime(LocalDateTime.now())
                 .totalQuantity(purchaseOrder.getTotalQuantity())
                 .supplierId(purchaseOrder.getSupplierId())
+                .isReturn(false)
                 .build();
         inventoryReceiptRepository.save(inventoryReceipt);
 
@@ -287,6 +288,7 @@ public class InventoryReceiptServicesImpl implements IInventoryReceiptServices {
                 .statusImport(Constants.STATUS_IMPORT_SUCCESS)
                 .createAt(LocalDate.now())
                 .createAtDateTime(LocalDateTime.now())
+                .isReturn(true)
                 .build();
         inventoryReceiptRepository.save(inventoryReceipt);
         List<BatchNumber> batchNumbers = new ArrayList<>();

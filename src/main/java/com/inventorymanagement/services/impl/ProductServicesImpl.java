@@ -1,6 +1,7 @@
 package com.inventorymanagement.services.impl;
 
 import com.inventorymanagement.constant.Constants;
+import com.inventorymanagement.constant.UnitEnum;
 import com.inventorymanagement.dto.ProductCategoryDTO;
 import com.inventorymanagement.dto.ProductCreateDTO;
 import com.inventorymanagement.dto.ProductDTO;
@@ -13,20 +14,30 @@ import com.inventorymanagement.repository.CategoryRepository;
 import com.inventorymanagement.repository.ProcessCheckRepository;
 import com.inventorymanagement.repository.ProductRepository;
 import com.inventorymanagement.repository.custom.ProductRepositoryCustom;
+import com.inventorymanagement.services.ICategoryServices;
 import com.inventorymanagement.services.IEmployeeServices;
 import com.inventorymanagement.services.IProductServices;
 import com.inventorymanagement.utils.Base64Utils;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,10 +48,8 @@ public class ProductServicesImpl implements IProductServices {
     private final ProductRepositoryCustom productRepositoryCustom;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
-    private final Base64Utils base64Utils;
     private final CloudinaryServices cloudinaryServices;
-    private final ProcessCheckRepository processCheckRepository;
-
+    private final ResourceLoader resourceLoader;
     @Override
     public void createProduct(String authHeader, ProductCreateDTO productDTO) throws InventoryException, IOException {
         Employee me = employeeServices.getFullInformation(authHeader);
@@ -133,7 +142,7 @@ public class ProductServicesImpl implements IProductServices {
     }
 
     @Override
-    public List<ProductCategoryDTO> getProductsDependCategoryCode() throws IOException {
+    public List<ProductCategoryDTO> getProductsDependCategoryCode(){
         List<ProductCategoryDTO> results = new ArrayList<>();
         Map<String, List<ProductDTO>> mapCategoryProduct = new HashMap<>();
         Map<String, Category> categoryMapValue = categoryRepository.findAll().stream().collect(
@@ -161,6 +170,53 @@ public class ProductServicesImpl implements IProductServices {
             results.add(item);
         });
         return results;
+    }
+
+    @Override
+    public byte[] downloadExcelTemplate() throws IOException {
+        Resource resource = resourceLoader.getResource("classpath:templates/template-import.xlsx");
+        try (InputStream fis =  resource.getInputStream()) {
+            Workbook workbook = new XSSFWorkbook(fis);
+            // sheet category
+            Sheet sheetCategory = workbook.getSheetAt(1);
+
+            var dataCategory = categoryRepository.findAll();
+            int rowCategoryIndex = 1;
+            for (Category category : dataCategory){
+                Row row = sheetCategory.createRow(rowCategoryIndex);
+                AtomicInteger col = new AtomicInteger(0);
+                row.createCell(col.getAndIncrement()).setCellValue(category.getName());
+                row.createCell(col.getAndIncrement()).setCellValue(category.getCode());
+                rowCategoryIndex++;
+            }
+            // sheet brand
+            Sheet sheetBrand = workbook.getSheetAt(2);
+            var dateBrand = brandRepository.findAll();
+            int rowBrandIndex = 1;
+            for (Brand brand : dateBrand){
+                Row row = sheetBrand.createRow(rowBrandIndex);
+                AtomicInteger col = new AtomicInteger(0);
+                row.createCell(col.getAndIncrement()).setCellValue(brand.getName());
+                row.createCell(col.getAndIncrement()).setCellValue(brand.getCode());
+                rowCategoryIndex++;
+            }
+            // sheet unit
+            Sheet sheetUnit = workbook.getSheetAt(3);
+            var values = Arrays.asList(UnitEnum.values());
+            var dateUnit = values.stream().map(UnitEnum::getName).toList();
+            int rowUnit = 1;
+            for (String unit : dateUnit){
+                Row row = sheetUnit.createRow(rowUnit);
+                AtomicInteger col = new AtomicInteger(0);
+                row.createCell(col.getAndIncrement()).setCellValue(unit);
+                rowUnit++;
+            }
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            workbook.write(byteArrayOutputStream);
+            workbook.close();
+
+            return byteArrayOutputStream.toByteArray();
+        }
     }
 
     private void validateDataDTO(ProductCreateDTO product) throws InventoryException {

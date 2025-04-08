@@ -19,6 +19,7 @@ public class ReturnProductDTO {
     private int quantityReturn;
     private String reason;
     private String statusProduct;
+    private Float discount;
     private LocalDate dateExpired;
     private LocalDate dateOfManufacture;
     private Product productInformation;

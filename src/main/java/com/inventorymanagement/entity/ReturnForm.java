@@ -24,8 +24,24 @@ public class ReturnForm {
     private String orderCode;
     @Column(name = "create_at")
     private LocalDateTime createAt;
+    @Column(name = "create_by")
+    private String createBy;
     @Column(name = "isUsed")
     private Boolean isUsed;
     @Column(name = "approve_status")
     private String approveStatus;
+    @Column(name = "approve_by")
+    private String approveBy;
+    @Column(name = "approve_date")
+    private LocalDateTime approveDate;
+    @Column(name = "total_amount")
+    private Double totalAmount;
+    @Column(name = "customer_id")
+    private Integer customerId;
+    @PrePersist
+    public void prePersist() {
+        if (this.createAt == null) {
+            this.createAt = LocalDateTime.now();
+        }
+    }
 }

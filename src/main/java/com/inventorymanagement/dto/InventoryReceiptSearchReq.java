@@ -22,4 +22,5 @@ public class InventoryReceiptSearchReq {
     private LocalDate fromDate;
     private LocalDate toDate;
     private Integer supplierId;
+    private Boolean isReturn;
 }

@@ -8,6 +8,7 @@ import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.IProductServices;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -133,6 +134,22 @@ public class ProductController {
                    HttpStatus.INTERNAL_SERVER_ERROR
            );
        }
+    }
+    @GetMapping(value = "/export-template")
+    public ResponseEntity<Object> exportTemplate() {
+        try {
+            var body = productServices.downloadExcelTemplate();
+            ByteArrayResource resource = new ByteArrayResource(body);
 
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=export-template.xlsx")
+                    .contentLength(body.length)
+                    .body(resource);
+        } catch (IOException e){
+            return new ResponseEntity<>(
+                    e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
     }
 }

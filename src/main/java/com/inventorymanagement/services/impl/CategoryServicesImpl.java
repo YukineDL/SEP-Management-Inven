@@ -65,8 +65,16 @@ public class CategoryServicesImpl implements ICategoryServices {
                     ExceptionMessage.messages.get(ExceptionMessage.CATEGORY_NAME_EMPTY)
             );
         }
+        String code = createCode(categoryDTO.getName());
+        if(categoryRepository.existsByCodeAndCodeNotLike(code, categoryCode)){
+            throw new InventoryException(
+                    ExceptionMessage.CATEGORY_NAME_EXISTED,
+                    ExceptionMessage.messages.get(ExceptionMessage.CATEGORY_NAME_EXISTED)
+            );
+        }
         Category category = findByCode(categoryCode);
         category.setName(categoryDTO.getName());
+        category.setCode(code);
         categoryRepository.save(category);
     }
 

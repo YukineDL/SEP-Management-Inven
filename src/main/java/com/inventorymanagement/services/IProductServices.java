@@ -19,4 +19,5 @@ public interface IProductServices {
     ProductDTO findByCode(String code) throws InventoryException, IOException;
     Page<ProductDTO> findByCategoryCode(String categoryCode, Pageable pageable);
     List<ProductCategoryDTO> getProductsDependCategoryCode() throws IOException;
+    byte[] downloadExcelTemplate() throws IOException;
 }

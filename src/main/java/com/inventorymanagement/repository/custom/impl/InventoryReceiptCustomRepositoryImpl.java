@@ -87,6 +87,10 @@ public class InventoryReceiptCustomRepositoryImpl implements InventoryReceiptCus
             sqlWhere.append(" and ir.create_at <= :toDate");
             params.put("toDate",req.getToDate());
         }
+        if(!Objects.isNull(req.getIsReturn())){
+            sqlWhere.append(" and ir.is_return = :isReturn");
+            params.put("isReturn", req.getIsReturn());
+        }
     }
     private void setParams(Map<String, Object> params, Query sql) {
         params.forEach(sql::setParameter);

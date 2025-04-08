@@ -48,6 +48,9 @@ public class ExceptionMessage {
     public static String RETURN_PRODUCT_NOT_IN_ORDER = "RETURN_PRODUCT_NOT_IN_ORDER";
     public static String RETURN_FORM_IS_USED = "RETURN_FORM_IS_USED";
     public static String BRAND_NAME_EXISTED = "BRAND_NAME_EXISTED";
+    public static String CATEGORY_NAME_EXISTED = "CATEGORY_NAME_EXISTED";
+    public static String INVENTORY_SHEET_EXISTED_TIME = "INVENTORY_SHEET_EXISTED_TIME";
+    public static String INVENTORY_SHEET_NOT_EXISTED = "INVENTORY_SHEET_NOT_EXISTED";
 
     static {
         messages.put(EXISTED_EMPLOYEE, "Nhân viên đã tồn tại");
@@ -92,5 +95,8 @@ public class ExceptionMessage {
         messages.put(RETURN_PRODUCT_NOT_IN_ORDER, "Sản phẩm không nằm trong đơn hàng");
         messages.put(RETURN_FORM_IS_USED, "Đơn hoàn đã được áp dụng cho phiếu nhập");
         messages.put(BRAND_NAME_EMPTY, "Tên nhãn hàng đã tồn tại");
+        messages.put(CATEGORY_NAME_EXISTED, "Tên danh mục đã tồn tại");
+        messages.put(INVENTORY_SHEET_EXISTED_TIME, "Đã có phiếu kiểm kê vào thời gian này");
+        messages.put(INVENTORY_SHEET_EXISTED_TIME, "Phiếu kiểm kê không tồn tại");
     }
 }

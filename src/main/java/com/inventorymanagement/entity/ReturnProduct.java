@@ -32,4 +32,6 @@ public class ReturnProduct {
     private LocalDate dateExpired;
     @Column(name = "date_of_manufacture")
     private LocalDate dateOfManufacture;
+    @Column(name = "discount")
+    private Float discount;
 }

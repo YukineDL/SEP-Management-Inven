@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface InventorySheetRepository extends JpaRepository<InventorySheet, Integer> {
-    List<InventorySheet> findByStartDateGreaterThanEqualAndEndDateLessThanEqual(LocalDate startDate, LocalDate endDate);
+    List<InventorySheet> findByStartDateAndEndDate(LocalDate startDate, LocalDate endDate);
+    Optional<InventorySheet> findByCode(String code);
 }

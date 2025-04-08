@@ -49,4 +49,6 @@ public class InventoryReceipt {
     private Integer totalQuantity;
     @Column(name = "supplier_id")
     private Integer supplierId;
+    @Column(name = "is_return")
+    private Boolean isReturn;
 }

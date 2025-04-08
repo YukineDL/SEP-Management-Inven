@@ -83,7 +83,8 @@ public class InventoryReceiptController {
                                                        @RequestParam(required = false) String code,
                                                        @RequestParam(required = false) LocalDate fromDate,
                                                        @RequestParam(required = false) LocalDate toDate,
-                                                       @RequestParam(required = false) Integer supplierId){
+                                                       @RequestParam(required = false) Integer supplierId,
+                                                       @RequestParam(required = false) Boolean isReturn){
         try {
             InventoryReceiptSearchReq searchReq = InventoryReceiptSearchReq.builder()
                     .employeeCode(employeeCode)
@@ -95,6 +96,7 @@ public class InventoryReceiptController {
                     .fromDate(fromDate)
                     .code(code)
                     .supplierId(supplierId)
+                    .isReturn(isReturn)
                     .build();
             Pageable pageable = PageRequest.of(page,size);
             return new ResponseEntity<>(

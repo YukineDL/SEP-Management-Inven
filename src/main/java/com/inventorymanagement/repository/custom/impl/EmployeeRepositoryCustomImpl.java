@@ -1,5 +1,6 @@
 package com.inventorymanagement.repository.custom.impl;
 
+import com.inventorymanagement.constant.RoleEnum;
 import com.inventorymanagement.dto.EmployeeSearchDTO;
 import com.inventorymanagement.entity.Employee;
 import com.inventorymanagement.repository.custom.EmployeeRepositoryCustom;
@@ -28,6 +29,7 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
                 SELECT * FROM employee
                 where 1=1
                 """);
+        sql.append(" and role_code <> '").append(RoleEnum.ADMIN.name()).append("'");
         addingWhereClause(sql,searchDTO,parameters);
         addingPaging(sql, pageable);
         Query query = entityManager.createNativeQuery(sql.toString(),Employee.class);

@@ -1,23 +1,29 @@
 package com.inventorymanagement.repository.custom.impl;
 
 import com.inventorymanagement.constant.PURCHASE_ORDER_APPROVE;
+import com.inventorymanagement.dto.InventorySheetSearchDTO;
 import com.inventorymanagement.dto.ProductSheetDTO;
 import com.inventorymanagement.dto.ProductSheetExportDTO;
+import com.inventorymanagement.dto.ProductSheetSearchReqDTO;
+import com.inventorymanagement.entity.InventorySheet;
 import com.inventorymanagement.repository.custom.IProductSheetCustomRepository;
 import com.inventorymanagement.utils.RepositoryUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Repository
-public class ProductSheetCustomRepositoryImpl implements IProductSheetCustomRepository {
+public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository implements IProductSheetCustomRepository {
     @PersistenceContext
     private EntityManager em;
     @Override
@@ -106,5 +112,90 @@ public class ProductSheetCustomRepositoryImpl implements IProductSheetCustomRepo
         }
 
         return productSheetDTOS;
+    }
+
+    @Override
+    public Page<ProductSheetDTO> getDetailBySearchRequest(ProductSheetSearchReqDTO dto, Pageable pageable) {
+        StringBuilder sql = new StringBuilder();
+        StringBuilder selectSql = new StringBuilder();
+        StringBuilder whereSql = new StringBuilder();
+        StringBuilder pageSql = new StringBuilder();
+        StringBuilder countSql = new StringBuilder();
+        selectSql.append("""
+                SELECT ps.product_code, ps.product_name, ps.product_unit, ps.product_status,ps.quantity_shipped ,
+                ps.total_import_amount, ps.product_export_quantity, ps.total_export_amount
+                """);
+        whereSql.append("""
+                FROM product_sheet ps
+                WHERE 1=1
+                """);
+        var params = new HashMap<String, Object>();
+        this.addParams(params,whereSql,dto);
+        this.addingPageQuery(pageSql,pageable);
+        countSql.append("""
+                SELECT COUNT(*)
+                """);
+        countSql.append(whereSql);
+
+        sql.append(selectSql).append(whereSql).append(pageSql);
+        Query query = em.createNativeQuery(sql.toString());
+        Query count = em.createNativeQuery(countSql.toString());
+        this.setParams(query,params);
+        this.setParams(count,params);
+        List<Object[]> results = query.getResultList();
+        List<ProductSheetDTO> productSheetDTOS = new ArrayList<>();
+        for (Object[] row : results) {
+            AtomicInteger index = new AtomicInteger(0);
+            ProductSheetDTO productSheetDTO = new ProductSheetDTO();
+            productSheetDTO.setProductCode(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
+            productSheetDTO.setProductName(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
+            productSheetDTO.setProductUnit(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
+            productSheetDTO.setProductStatus(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
+            productSheetDTO.setQuantityShipped(
+                    Long.valueOf(RepositoryUtils.setValue(row[index.getAndIncrement()],Integer.class)));
+            productSheetDTO.setTotalImportAmount(RepositoryUtils.setValue(row[index.getAndIncrement()],Double.class));
+            productSheetDTO.setProductExportQuantity(
+                    Long.valueOf(RepositoryUtils.setValue(row[index.getAndIncrement()],Integer.class)));
+            productSheetDTO.setExportTotalAmount(RepositoryUtils.setValue(row[index.getAndIncrement()],Double.class));
+            productSheetDTOS.add(productSheetDTO);
+        }
+        return new PageImpl<>(productSheetDTOS, pageable, (Long)count.getSingleResult());
+    }
+
+    private void addParams(Map<String, Object> params, StringBuilder sql, ProductSheetSearchReqDTO dto){
+        if(StringUtils.isNotEmpty(dto.getCode())){
+            sql.append("""
+                    and ps.inventory_sheet_code = :code
+                    """);
+            params.put("code", dto.getCode());
+        }
+        if(StringUtils.isNotEmpty(dto.getProductCode())){
+            sql.append(" and ps.product_code like ")
+                    .append("'%").append(dto.getProductCode()).append("%'");
+        }
+        if(StringUtils.isNotEmpty(dto.getProductName())){
+            sql.append(" and ps.product_name like ")
+                    .append("'%").append(dto.getProductName()).append("%'");
+        }
+        if(StringUtils.isNotEmpty(dto.getProductUnit())){
+            sql.append(" and ps.product_unit like ")
+                    .append("'%").append(dto.getProductUnit()).append("%'");
+        }
+        if(StringUtils.isNotEmpty(dto.getProductStatus())){
+            sql.append(" and ps.product_status = :status ");
+            params.put("status", dto.getProductStatus());
+        }
+        if(!Objects.isNull(dto.getImportQuantityProduct())){
+            sql.append(" and ps.quantity_shipped <= :quantityShipped ");
+            params.put("quantityShipped", dto.getImportQuantityProduct());
+        }
+        if(!Objects.isNull(dto.getExportQuantityProduct())){
+            sql.append(" and ps.product_export_quantity <= :productExportQuantity ");
+            params.put("productExportQuantity", dto.getExportQuantityProduct());
+        }
+        if(!Objects.isNull(dto.getImportPrice())){
+            sql.append(" and ps.total_import_amount <= :totalImportAmount ");
+            params.put("totalImportAmount", dto.getImportPrice());
+        }
     }
 }

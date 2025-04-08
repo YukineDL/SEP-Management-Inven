@@ -9,9 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface IReturnFormServices {
-    void createReturnForm(ReturnFormCreateDTO dto) throws InventoryException;
-    void approveReturnForm(String returnCode) throws InventoryException;
-    void rejectReturnForm(String returnCode) throws InventoryException;
-    Page<ReturnForm> findBySearchRequest(ReturnFormSearchReq dto, Pageable pageable);
+    void createReturnForm(ReturnFormCreateDTO dto, String authHeader) throws InventoryException;
+    void approveReturnForm(String authHeader, String returnCode) throws InventoryException;
+    void rejectReturnForm(String authHeader,String returnCode) throws InventoryException;
+    Page<ReturnFormDTO> findBySearchRequest(ReturnFormSearchReq dto, Pageable pageable, String authHeader) throws InventoryException;
     ReturnFormDTO findReturnForm(String returnCode) throws InventoryException;
 }
