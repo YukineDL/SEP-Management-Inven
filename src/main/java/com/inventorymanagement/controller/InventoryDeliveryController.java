@@ -1,11 +1,11 @@
 package com.inventorymanagement.controller;
 
 import com.inventorymanagement.dto.InventoryDeliveryCreateDTO;
-import com.inventorymanagement.dto.InventoryDeliveryDTO;
 import com.inventorymanagement.dto.InventoryDeliverySearchReqDTO;
 import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.IInventoryDeliveryServices;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +19,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping(value = "/inventory-delivery")
 public class InventoryDeliveryController {
     private final IInventoryDeliveryServices inventoryDeliveryServices;

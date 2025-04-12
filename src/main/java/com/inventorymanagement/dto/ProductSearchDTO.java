@@ -14,4 +14,5 @@ public class ProductSearchDTO {
     private String code;
     private String categoryCode;
     private String brandCode;
+    private String unitCode;
 }

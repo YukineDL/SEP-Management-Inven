@@ -29,6 +29,8 @@ public class CustomerServicesImpl implements ICustomerServices {
                 .name(dto.getName())
                 .phoneNumber(dto.getPhoneNumber())
                 .address(dto.getAddress())
+                .email(dto.getEmail())
+                .website(dto.getWebsite())
                 .build();
         return customerRepository.save(customer);
     }

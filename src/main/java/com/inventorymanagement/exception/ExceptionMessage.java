@@ -51,6 +51,8 @@ public class ExceptionMessage {
     public static String CATEGORY_NAME_EXISTED = "CATEGORY_NAME_EXISTED";
     public static String INVENTORY_SHEET_EXISTED_TIME = "INVENTORY_SHEET_EXISTED_TIME";
     public static String INVENTORY_SHEET_NOT_EXISTED = "INVENTORY_SHEET_NOT_EXISTED";
+    public static String UNIT_CODE_SAME = "UNIT_CODE_SAME";
+    public static String UNIT_NOT_EXISTED = "UNIT_NOT_EXISTED";
 
     static {
         messages.put(EXISTED_EMPLOYEE, "Nhân viên đã tồn tại");
@@ -62,7 +64,7 @@ public class ExceptionMessage {
         messages.put(ACCOUNT_BANNED, "Tài khoản đã bị khóa");
         messages.put(CATEGORY_EXISTED, "Danh mục sản phẩm đã tồn tại");
         messages.put(CATEGORY_NAME_EMPTY, "Tên danh mục không được để trống ");
-        messages.put(CATEGORY_EXISTED, "Danh mục không tồn tại trong hệ thống ");
+        messages.put(CATEGORY_NOT_EXISTED, "Danh mục không tồn tại trong hệ thống ");
         messages.put(BRAND_EXISTED, "Hãng đã tồn tại ");
         messages.put(BRAND_NOT_EXISTED, "Hãng này không tồn tại");
         messages.put(BRAND_NAME_EMPTY, "Tên hãng không được để trống ");
@@ -98,5 +100,7 @@ public class ExceptionMessage {
         messages.put(CATEGORY_NAME_EXISTED, "Tên danh mục đã tồn tại");
         messages.put(INVENTORY_SHEET_EXISTED_TIME, "Đã có phiếu kiểm kê vào thời gian này");
         messages.put(INVENTORY_SHEET_EXISTED_TIME, "Phiếu kiểm kê không tồn tại");
+        messages.put(UNIT_CODE_SAME, "Đơn vị tính đã tồn tại");
+        messages.put(UNIT_NOT_EXISTED, "Đơn vị tính không tồn tại");
     }
 }

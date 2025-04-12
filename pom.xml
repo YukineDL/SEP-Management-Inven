@@ -93,6 +93,30 @@
 			<artifactId>dotenv-java</artifactId>
 			<version>2.2.4</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.25.0</version> <!-- Use the latest stable version -->
+		</dependency>
+		<dependency>
+			<artifactId>poi-ooxml</artifactId>
+			<groupId>org.apache.poi</groupId>
+			<version>5.2.5</version>
+			<exclusions>
+				<exclusion>
+					<!--          PENTEST Yêu cầu commons-compress : 1.26.0-->
+					<!--          ooxml: 5.2.5 » commons-compress: 1.25.0-->
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-compress</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -132,3 +156,4 @@
 		</plugins>
 	</build>
 </project>
+

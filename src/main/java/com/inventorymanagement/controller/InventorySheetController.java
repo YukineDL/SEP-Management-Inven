@@ -6,6 +6,7 @@ import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.ExceptionMessage;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.IInventorySheetServices;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping(value = "/inventory-sheet")
 public class InventorySheetController {
     private final IInventorySheetServices inventorySheetServices;
@@ -27,8 +29,9 @@ public class InventorySheetController {
                                                            HttpServletRequest request) {
         try {
             String authHeader = request.getHeader("Authorization");
-            inventorySheetServices.createInventorySheet(authHeader, startDate, endDate);
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(
+                    inventorySheetServices.createInventorySheet(authHeader, startDate, endDate),
+                    HttpStatus.CREATED);
         } catch (InventoryException e){
             return new ResponseEntity<>(
                     ApiResponse.builder()

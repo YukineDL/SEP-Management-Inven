@@ -37,7 +37,8 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
                 CAST(SUM(COALESCE(bn.quantity_shipped, 0)) AS SIGNED) AS quantity_shipped,
                 bn.status,
                 CAST(SUM(COALESCE(bn.export_quantity, 0)) AS SIGNED) AS export_quantity ,
-                SUM(bn.import_price * bn.quantity_shipped) as total_import_amount
+                SUM(bn.import_price * bn.quantity_shipped) as total_import_amount,
+                CAST(SUM(COALESCE(bn.inventoryQuantity, 0)) AS SIGNED) AS total_inventory_quantity
             FROM
                 batch_number bn
             WHERE
@@ -47,12 +48,11 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
         )
         SELECT
             p.code,
-            p.name,
-            p.unit,
             cte_date.quantity_shipped,
             cte_date.total_import_amount,
             cte_date.status,
-            cte_date.export_quantity
+            cte_date.export_quantity,
+            cte_date.total_inventory_quantity
         FROM
             product p
         JOIN
@@ -96,12 +96,11 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
             AtomicInteger index = new AtomicInteger(0);
             ProductSheetDTO productSheetDTO = new ProductSheetDTO();
             productSheetDTO.setProductCode(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
-            productSheetDTO.setProductName(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
-            productSheetDTO.setProductUnit(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
             productSheetDTO.setQuantityShipped(RepositoryUtils.setValue(row[index.getAndIncrement()],Long.class));
             productSheetDTO.setTotalImportAmount(RepositoryUtils.setValue(row[index.getAndIncrement()],Double.class));
             productSheetDTO.setProductStatus(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
             productSheetDTO.setProductExportQuantity(RepositoryUtils.setValue(row[index.getAndIncrement()],Long.class));
+            productSheetDTO.setTotalInventoryQuantity(RepositoryUtils.setValue(row[index.getAndIncrement()], Long.class));
             productSheetDTO.createKeyMap();
             if(productExportMap.containsKey(productSheetDTO.getKeyMap())){
                 productSheetDTO.setExportTotalAmount(productExportMap.get(productSheetDTO.getKeyMap()).getTotalExportPrice());
@@ -122,11 +121,12 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
         StringBuilder pageSql = new StringBuilder();
         StringBuilder countSql = new StringBuilder();
         selectSql.append("""
-                SELECT ps.product_code, ps.product_name, ps.product_unit, ps.product_status,ps.quantity_shipped ,
-                ps.total_import_amount, ps.product_export_quantity, ps.total_export_amount
+                SELECT ps.product_code, ps.product_status,ps.quantity_shipped ,
+                ps.total_import_amount, ps.product_export_quantity, ps.total_export_amount, ps.total_inventory_quantity
                 """);
         whereSql.append("""
                 FROM product_sheet ps
+                JOIN product p ON p.code = ps.product_code
                 WHERE 1=1
                 """);
         var params = new HashMap<String, Object>();
@@ -148,8 +148,6 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
             AtomicInteger index = new AtomicInteger(0);
             ProductSheetDTO productSheetDTO = new ProductSheetDTO();
             productSheetDTO.setProductCode(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
-            productSheetDTO.setProductName(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
-            productSheetDTO.setProductUnit(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
             productSheetDTO.setProductStatus(RepositoryUtils.setValue(row[index.getAndIncrement()],String.class));
             productSheetDTO.setQuantityShipped(
                     Long.valueOf(RepositoryUtils.setValue(row[index.getAndIncrement()],Integer.class)));
@@ -157,6 +155,8 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
             productSheetDTO.setProductExportQuantity(
                     Long.valueOf(RepositoryUtils.setValue(row[index.getAndIncrement()],Integer.class)));
             productSheetDTO.setExportTotalAmount(RepositoryUtils.setValue(row[index.getAndIncrement()],Double.class));
+            productSheetDTO.setTotalInventoryQuantity(
+                    Long.valueOf(RepositoryUtils.setValue(row[index.getAndIncrement()],Integer.class)));
             productSheetDTOS.add(productSheetDTO);
         }
         return new PageImpl<>(productSheetDTOS, pageable, (Long)count.getSingleResult());
@@ -174,12 +174,12 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
                     .append("'%").append(dto.getProductCode()).append("%'");
         }
         if(StringUtils.isNotEmpty(dto.getProductName())){
-            sql.append(" and ps.product_name like ")
+            sql.append(" and p.product_name like ")
                     .append("'%").append(dto.getProductName()).append("%'");
         }
         if(StringUtils.isNotEmpty(dto.getProductUnit())){
-            sql.append(" and ps.product_unit like ")
-                    .append("'%").append(dto.getProductUnit()).append("%'");
+            sql.append(" and p.unit_code = :unitCode ");
+            params.put("unitCode", dto.getProductUnit());
         }
         if(StringUtils.isNotEmpty(dto.getProductStatus())){
             sql.append(" and ps.product_status = :status ");

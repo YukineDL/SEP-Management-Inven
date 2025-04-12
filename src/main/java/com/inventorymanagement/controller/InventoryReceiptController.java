@@ -6,6 +6,7 @@ import com.inventorymanagement.dto.InventoryReturnCreateDTO;
 import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.IInventoryReceiptServices;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping(value = "/inventory-receipt")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class InventoryReceiptController {
     private final IInventoryReceiptServices inventoryReceiptServices;
 

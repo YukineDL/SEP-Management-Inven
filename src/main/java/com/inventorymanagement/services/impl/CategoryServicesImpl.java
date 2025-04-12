@@ -9,6 +9,7 @@ import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.repository.CategoryRepository;
 import com.inventorymanagement.services.ICategoryServices;
 import com.inventorymanagement.services.IEmployeeServices;
+import com.inventorymanagement.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -39,7 +40,7 @@ public class CategoryServicesImpl implements ICategoryServices {
         }
         Category category = Category.builder()
                 .name(categoryDTO.getName())
-                .code(createCode(categoryDTO.getName()))
+                .code(Utils.convertToCode(categoryDTO.getName()))
                 .build();
         if(categoryRepository.existsByCode(category.getCode())){
             throw new InventoryException(
@@ -65,7 +66,7 @@ public class CategoryServicesImpl implements ICategoryServices {
                     ExceptionMessage.messages.get(ExceptionMessage.CATEGORY_NAME_EMPTY)
             );
         }
-        String code = createCode(categoryDTO.getName());
+        String code = Utils.convertToCode(categoryDTO.getName());
         if(categoryRepository.existsByCodeAndCodeNotLike(code, categoryCode)){
             throw new InventoryException(
                     ExceptionMessage.CATEGORY_NAME_EXISTED,
@@ -96,11 +97,6 @@ public class CategoryServicesImpl implements ICategoryServices {
         return categoryOp.get();
     }
 
-    private String createCode(String name){
-        String[] nameSplit = name.split(" ");
-        return String.join("-",
-                Arrays.stream(nameSplit).map(item -> item.toUpperCase(Locale.ROOT)).toList());
-    }
     private boolean validateDTO(CategoryDTO categoryDTO){
         return categoryDTO.getName() != null && !categoryDTO.getName().isEmpty();
     }

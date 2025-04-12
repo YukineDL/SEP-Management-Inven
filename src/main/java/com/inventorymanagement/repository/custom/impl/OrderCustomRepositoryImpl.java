@@ -33,7 +33,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         StringBuilder countSql = new StringBuilder();
         sqlSelect.append("""
                 Select o.code, o.approve_status, o.approve_by, o.approve_date, o.delivery_status, o.total_amount, o.create_at,
-                          o.customer_id, o.employee_code
+                          o.customer_id, o.employee_code, o.delivery_by, o.delivery_date
                 """);
         whereSql.append("""
                 from `order` o
@@ -72,6 +72,8 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
             orderDTO.setCreateAt(RepositoryUtils.setValue(row[index.getAndIncrement()], LocalDateTime.class));
             orderDTO.setCustomerId(RepositoryUtils.setValue(row[index.getAndIncrement()], Integer.class));
             orderDTO.setEmployeeCode(RepositoryUtils.setValue(row[index.getAndIncrement()], String.class));
+            orderDTO.setDeliveryBy(RepositoryUtils.setValue(row[index.getAndIncrement()], String.class));
+            orderDTO.setDeliveryDate(RepositoryUtils.setValue(row[index.getAndIncrement()], LocalDateTime.class));
             results.add(orderDTO);
         }
         return new PageImpl<>(results, pageable, totalElement);

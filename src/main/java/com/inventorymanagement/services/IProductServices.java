@@ -14,7 +14,7 @@ import java.util.Map;
 
 public interface IProductServices {
     void createProduct(String authHeader, ProductCreateDTO product) throws InventoryException,IOException;
-    Page<ProductDTO> findAllBySearchRequest( ProductSearchDTO searchDTO, Pageable pageable) throws InventoryException, IOException;
+    Page<ProductDTO> findAllBySearchRequest( ProductSearchDTO searchDTO, Pageable pageable) throws InventoryException;
     void updateProduct(String authHeader, ProductCreateDTO productCreateDTO, String productCode) throws InventoryException, IOException;
     ProductDTO findByCode(String code) throws InventoryException, IOException;
     Page<ProductDTO> findByCategoryCode(String categoryCode, Pageable pageable);

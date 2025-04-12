@@ -22,5 +22,5 @@ public class ReturnProductDTO {
     private Float discount;
     private LocalDate dateExpired;
     private LocalDate dateOfManufacture;
-    private Product productInformation;
+    private ProductDTO productInformation;
 }

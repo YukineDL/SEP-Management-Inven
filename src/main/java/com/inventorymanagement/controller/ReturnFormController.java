@@ -5,6 +5,7 @@ import com.inventorymanagement.dto.ReturnFormSearchReq;
 import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.IReturnFormServices;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping(value = "return-form")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class ReturnFormController {
     private final IReturnFormServices returnFormServices;

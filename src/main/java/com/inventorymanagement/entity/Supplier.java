@@ -26,6 +26,8 @@ public class Supplier {
     private String taxNumber;
     @Column(name = "is_deleted")
     private Boolean isDeleted;
+    @Column(name = "email")
+    private String email;
     public Supplier(SupplierDTO dto){
         if(StringUtils.isNotBlank(dto.getName())){
             this.name = dto.getName();
@@ -39,6 +41,7 @@ public class Supplier {
         if(StringUtils.isNotBlank(dto.getTaxNumber())){
             this.taxNumber = dto.getTaxNumber();
         }
+        this.email = dto.getEmail();
     }
     public void updateSupplier(SupplierDTO dto){
         if(StringUtils.isNotBlank(dto.getName())){
@@ -52,6 +55,9 @@ public class Supplier {
         }
         if(StringUtils.isNotBlank(dto.getTaxNumber())){
             this.taxNumber = dto.getTaxNumber();
+        }
+        if(StringUtils.isNotBlank(dto.getEmail())){
+            this.email = dto.getEmail();
         }
     }
 }

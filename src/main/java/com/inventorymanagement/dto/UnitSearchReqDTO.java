@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CustomerDTO {
-    private String name;
-    private String address;
-    private String phoneNumber;
-    private String email;
-    private String website;
+public class UnitSearchReqDTO {
+    private String unitName;
+    private Boolean isDeleted;
 }

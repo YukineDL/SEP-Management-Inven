@@ -5,6 +5,7 @@ import com.inventorymanagement.dto.OrderSearchReqDTO;
 import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.IOrderServices;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cglib.core.Local;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping(value = "/order")
 public class OrderController {
     private final IOrderServices orderServices;

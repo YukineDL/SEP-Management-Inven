@@ -14,7 +14,6 @@ public interface BatchNumberRepository extends JpaRepository<BatchNumber, Intege
     FROM batch_number b
     WHERE b.status IN :status
     AND b.product_code IN :productCodes
-    AND b.date_expired >= CURRENT_DATE  -- Expired or expiring today or in the future
     ORDER BY b.date_expired
 """, nativeQuery = true)
     List<BatchNumber> findProductByStatusInAndProductCodeIn(List<String> productCodes, List<String> status);

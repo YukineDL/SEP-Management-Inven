@@ -6,13 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SupplierDTO {
-    private String name;
-    private String address;
-    private String phoneNumber;
-    private String taxNumber;
-    private String email;
+@Builder
+public class StatisticOrderDTO {
+    private int month;
+    private int totalOrderInMonth;
 }

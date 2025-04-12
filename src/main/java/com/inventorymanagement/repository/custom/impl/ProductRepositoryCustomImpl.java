@@ -31,7 +31,8 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         selectSQL.append(""" 
                 select p.code
                                 ,p.name
-                                ,p.unit
+                                ,p.unit_code
+                                ,u.name
                                 ,p.description
                                 ,p.selling_price
                                 ,p.category_code
@@ -42,8 +43,10 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 """);
         whereSQL.append("""
                 from product p
-                                join brand b on b.code = p.brand_code
-                                join category c on c.code = p.category_code where 1=1
+                                left join brand b on b.code = p.brand_code
+                                left join category c on c.code = p.category_code
+                                left join unit u on u.code = p.unit_code
+                                where 1=1
                 """);
         orderBySql.append("""
                 order by p.create_at desc
@@ -75,7 +78,11 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         }
         if(StringUtils.isNotBlank(productSearchDTO.getName())) {
             sql.append(" and p.name like ")
-                    .append("'%").append(productSearchDTO.getName()).append("%'");
+                    .append("'%").append(productSearchDTO.getName()).append("%' ");
+        }
+        if(StringUtils.isNotEmpty(productSearchDTO.getUnitCode())){
+            sql.append(" and p.unit_code = :unitCode ");
+            parameters.put("unitCode", productSearchDTO.getUnitCode());
         }
         if(StringUtils.isNotBlank(productSearchDTO.getCategoryCode())){
             sql.append(" and p.category_code = :categoryCode ");

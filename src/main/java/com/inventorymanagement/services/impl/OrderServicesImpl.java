@@ -4,16 +4,10 @@ import com.inventorymanagement.constant.Constants;
 import com.inventorymanagement.constant.PURCHASE_ORDER_APPROVE;
 import com.inventorymanagement.constant.RoleEnum;
 import com.inventorymanagement.dto.*;
-import com.inventorymanagement.entity.Customer;
-import com.inventorymanagement.entity.Employee;
-import com.inventorymanagement.entity.Order;
-import com.inventorymanagement.entity.OrderProduct;
+import com.inventorymanagement.entity.*;
 import com.inventorymanagement.exception.ExceptionMessage;
 import com.inventorymanagement.exception.InventoryException;
-import com.inventorymanagement.repository.CustomerRepository;
-import com.inventorymanagement.repository.EmployeeRepository;
-import com.inventorymanagement.repository.OrderProductRepository;
-import com.inventorymanagement.repository.OrderRepository;
+import com.inventorymanagement.repository.*;
 import com.inventorymanagement.repository.custom.OrderCustomRepository;
 import com.inventorymanagement.repository.custom.OrderProductCustomRepository;
 import com.inventorymanagement.services.IEmployeeServices;
@@ -26,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +33,7 @@ public class OrderServicesImpl implements IOrderServices {
     private final EmployeeRepository employeeRepository;
     private final OrderProductCustomRepository orderProductCustomRepository;
     private final OrderCustomRepository orderCustomRepository;
+    private final UnitRepository unitRepository;
     private final List<String> LIST_ORDER_ROLE = List.of(
             RoleEnum.SALE.name(),
             RoleEnum.ADMIN.name()
@@ -161,6 +157,12 @@ public class OrderServicesImpl implements IOrderServices {
                 Employee::getCode, employee -> employee
         ));
         List<ProductOrderDTO> orderProductDTOS = orderProductCustomRepository.findByOrderCode(orderCode);
+        var unitMap = unitRepository.findAll().stream().collect(
+                Collectors.toMap(Unit::getCode, Unit::getName)
+        );
+        for (ProductOrderDTO item : orderProductDTOS){
+            item.setUnitName(unitMap.get(item.getUnit()));
+        }
         Order order = orderOp.get();
         OrderDTO orderDTO = new OrderDTO(order);
         orderDTO.setEmployee(employeeMap.get(order.getEmployeeCode()));
@@ -238,6 +240,8 @@ public class OrderServicesImpl implements IOrderServices {
             );
         }
         order.setDeliveryStatus(Constants.RECEIVE_DELIVERY);
+        order.setDeliveryBy(me.getName());
+        order.setDeliveryDate(LocalDateTime.now());
         orderRepository.save(order);
     }
 

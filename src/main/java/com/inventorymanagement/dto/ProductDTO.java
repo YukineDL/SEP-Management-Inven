@@ -14,7 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 public class ProductDTO {
     private String code;
     private String name;
-    private String unit;
+    private String unitCode;
+    private String unitName;
     private String description;
     private Double sellingPrice;
     private String categoryCode;
@@ -25,11 +26,11 @@ public class ProductDTO {
     public ProductDTO(Product product){
         this.code = StringUtils.isEmpty(product.getCode()) ? StringUtils.EMPTY : product.getCode();
         this.name = StringUtils.isEmpty(product.getName()) ? StringUtils.EMPTY : product.getName();
-        this.unit = StringUtils.isEmpty(product.getUnit()) ? StringUtils.EMPTY : product.getUnit();
         this.description = StringUtils.isEmpty(product.getDescription()) ? StringUtils.EMPTY : product.getDescription();
         this.sellingPrice = product.getSellingPrice();
         this.categoryCode = StringUtils.isEmpty(product.getCategoryCode()) ? StringUtils.EMPTY : product.getCategoryCode();
         this.brandCode = StringUtils.isEmpty(product.getBrandCode()) ? StringUtils.EMPTY : product.getBrandCode();
         this.imagePath = StringUtils.isEmpty(product.getImagePath()) ? StringUtils.EMPTY : product.getImagePath();
+        this.unitCode = StringUtils.isEmpty(product.getUnitCode()) ? StringUtils.EMPTY : product.getUnitCode();
     }
 }

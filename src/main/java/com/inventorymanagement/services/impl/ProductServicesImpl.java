@@ -9,14 +9,12 @@ import com.inventorymanagement.dto.ProductSearchDTO;
 import com.inventorymanagement.entity.*;
 import com.inventorymanagement.exception.ExceptionMessage;
 import com.inventorymanagement.exception.InventoryException;
-import com.inventorymanagement.repository.BrandRepository;
-import com.inventorymanagement.repository.CategoryRepository;
-import com.inventorymanagement.repository.ProcessCheckRepository;
-import com.inventorymanagement.repository.ProductRepository;
+import com.inventorymanagement.repository.*;
 import com.inventorymanagement.repository.custom.ProductRepositoryCustom;
 import com.inventorymanagement.services.ICategoryServices;
 import com.inventorymanagement.services.IEmployeeServices;
 import com.inventorymanagement.services.IProductServices;
+import com.inventorymanagement.services.IUnitServices;
 import com.inventorymanagement.utils.Base64Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -30,6 +28,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +49,7 @@ public class ProductServicesImpl implements IProductServices {
     private final CategoryRepository categoryRepository;
     private final CloudinaryServices cloudinaryServices;
     private final ResourceLoader resourceLoader;
+    private final IUnitServices unitServices;
     @Override
     public void createProduct(String authHeader, ProductCreateDTO productDTO) throws InventoryException, IOException {
         Employee me = employeeServices.getFullInformation(authHeader);
@@ -67,7 +67,7 @@ public class ProductServicesImpl implements IProductServices {
                 .name(productDTO.getProductName())
                 .code(productCode)
                 .description(productDTO.getProductDescription())
-                .unit(productDTO.getUnit())
+                .unitCode(productDTO.getUnit())
                 .sellingPrice(productDTO.getSellingPrice())
                 .categoryCode(productDTO.getCategoryCode())
                 .brandCode(productDTO.getBrandCode())
@@ -81,7 +81,10 @@ public class ProductServicesImpl implements IProductServices {
 
 
     @Override
-    public Page<ProductDTO> findAllBySearchRequest(ProductSearchDTO searchDTO, Pageable pageable) throws IOException {
+    public Page<ProductDTO> findAllBySearchRequest(ProductSearchDTO searchDTO, Pageable pageable) {
+        if(Objects.isNull(searchDTO)){
+            searchDTO = new ProductSearchDTO();
+        }
         return productRepositoryCustom.findAllBySearchRequest(searchDTO, pageable);
     }
 
@@ -125,11 +128,15 @@ public class ProductServicesImpl implements IProductServices {
                 Collectors.toMap(Brand::getCode, Brand::getName));
         Map<String, String> categoryMapValue = categoryRepository.findAll().stream().collect(
                 Collectors.toMap(Category::getCode, Category::getName));
-
+        var pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        var unitMap = unitServices.getAllUnits(null,pageable).stream().collect(
+                Collectors.toMap(Unit::getCode, Unit::getName)
+        );
         ProductDTO dto = new ProductDTO(productOP.get());
         // set value for dto
         dto.setBrandName(brandMapValue.get(dto.getBrandCode()));
         dto.setCategoryName(categoryMapValue.get(dto.getCategoryCode()));
+        dto.setUnitName(unitMap.get(dto.getUnitCode()));
         return dto;
     }
 
@@ -150,10 +157,15 @@ public class ProductServicesImpl implements IProductServices {
         Map<String, Brand> brandMapValue = brandRepository.findAll().stream().collect(
                 Collectors.toMap(Brand::getCode, brand -> brand));
         List<Product> content = productRepository.findAll();
+        var pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        var unitMap = unitServices.getAllUnits(null,pageable).stream().collect(
+                Collectors.toMap(Unit::getCode, unit -> unit)
+        );
         for (Product item : content){
             ProductDTO dto = new ProductDTO(item);
             dto.setBrandName(brandMapValue.get(dto.getBrandCode()).getName());
             dto.setCategoryName(categoryMapValue.get(dto.getCategoryCode()).getName());
+            dto.setUnitName(unitMap.get(item.getUnitCode()).getName());
             if(mapCategoryProduct.containsKey(item.getCategoryCode())){
                 mapCategoryProduct.get(item.getCategoryCode()).add(dto);
             }else{

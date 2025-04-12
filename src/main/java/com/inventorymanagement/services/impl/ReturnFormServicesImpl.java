@@ -11,6 +11,7 @@ import com.inventorymanagement.repository.*;
 import com.inventorymanagement.repository.custom.ReturnFormCustomRepository;
 import com.inventorymanagement.services.IEmployeeServices;
 import com.inventorymanagement.services.IOrderServices;
+import com.inventorymanagement.services.IProductServices;
 import com.inventorymanagement.services.IReturnFormServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ public class ReturnFormServicesImpl implements IReturnFormServices {
     private final ReturnProductRepository returnProductRepository;
     private final ReturnFormCustomRepository returnFormCustomRepository;
     private final ProductRepository productRepository;
+    private final IProductServices productServices;
     private final IOrderServices orderServices;
     private final IEmployeeServices employeeServices;
     private final CustomerRepository customerRepository;
@@ -48,22 +50,38 @@ public class ReturnFormServicesImpl implements IReturnFormServices {
             );
         }
         OrderDTO orderDTO = orderServices.findOrderByCode(dto.getOrderCode());
-        Map<String, Integer> returnProductMap = new HashMap<>();
-        for (ReturnProductCreateDTO item : dto.getProducts()) {
-            returnProductMap.merge(item.getProductCode(), item.getQuantity(), Integer::sum);
-        }
-        for(ProductOrderDTO item : orderDTO.getOrderProducts()){
-            Integer quantityReturn = returnProductMap.get(item.getCode());
-            if(Objects.isNull(quantityReturn)){
+        Map<String, Integer> returnProductMap = dto.getProducts().stream()
+                .collect(Collectors.toMap(
+                        ReturnProductCreateDTO::getProductCode,
+                        ReturnProductCreateDTO::getQuantity,
+                        Integer::sum
+                ));
+        var orderProductMap = orderDTO.getOrderProducts().stream().collect(
+                Collectors.toMap(ProductOrderDTO::getCode,Function.identity())
+        );
+        var returnFormExist = returnFormRepository.findByApproveStatusInAndOrderCode(
+                List.of(PURCHASE_ORDER_APPROVE.WAITING.name(),
+                        PURCHASE_ORDER_APPROVE.APPROVED.name()),
+                dto.getOrderCode()
+        ).stream().map(ReturnForm::getCode).toList();
+        var productReturnExist = returnProductRepository.findByReturnFormCodeIn(returnFormExist).stream().collect(
+                Collectors.toMap(
+                        ReturnProduct::getProductCode,
+                        ReturnProduct::getQuantityReturn,
+                        Integer::sum
+                )
+        );
+        for (ReturnProductCreateDTO item : dto.getProducts()){
+            if(!orderProductMap.containsKey(item.getProductCode())){
                 throw new InventoryException(
-                        ExceptionMessage.RETURN_PRODUCT_NOT_IN_ORDER,
-                        ExceptionMessage.messages.get(ExceptionMessage.RETURN_PRODUCT_NOT_IN_ORDER)
+                        ExceptionMessage.RETURN_PRODUCT_NOT_IN_ORDER
                 );
             }
-            if(quantityReturn > item.getQuantity()){
+            var returnQuantity = returnProductMap.get(item.getProductCode());
+            if(orderProductMap.get(item.getProductCode()).getQuantity() < returnQuantity){
                 throw new InventoryException(
-                    ExceptionMessage.RETURN_PRODUCT_OVER_ORDER,
-                        String.format(ExceptionMessage.messages.get(ExceptionMessage.RETURN_PRODUCT_OVER_ORDER), item.getCode())
+                        ExceptionMessage.RETURN_PRODUCT_OVER_ORDER,
+                        ExceptionMessage.messages.get(ExceptionMessage.RETURN_PRODUCT_OVER_ORDER)
                 );
             }
         }
@@ -208,8 +226,8 @@ public class ReturnFormServicesImpl implements IReturnFormServices {
             );
         }
         var returnProducts = returnProductRepository.findByReturnFormCode(returnCode);
-        var productsMap = productRepository.findAll().stream().collect(Collectors.toMap(
-                Product::getCode,product -> product
+        var productsMap = productServices.findAllBySearchRequest(null,PageRequest.of(0, Integer.MAX_VALUE)).stream().collect(Collectors.toMap(
+                ProductDTO::getCode,Function.identity()
         ));
         var employees = employeeRepository.findAll().stream().collect(
                 Collectors.toMap(Employee::getCode, Function.identity())

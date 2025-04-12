@@ -38,4 +38,8 @@ public class Order {
     private LocalDateTime approveDate;
     @Column(name = "isUsed")
     private Boolean isUsed;
+    @Column(name = "delivery_by")
+    private String deliveryBy;
+    @Column(name = "delivery_date")
+    private LocalDateTime deliveryDate;
 }

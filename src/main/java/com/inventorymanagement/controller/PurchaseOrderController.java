@@ -6,6 +6,7 @@ import com.inventorymanagement.dto.PurchaseOrderReqDTO;
 import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.IPurchaseOrderServices;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping(value = "/purchase-order")
 public class PurchaseOrderController {
     private final IPurchaseOrderServices purchaseOrderServices;

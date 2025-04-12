@@ -20,7 +20,7 @@ public class OrderProductCustomRepositoryImpl implements OrderProductCustomRepos
         StringBuilder sql = new StringBuilder();
         StringBuilder groupBySql = new StringBuilder();
         String selectSQL = """
-                select p.code , p.name, p.unit , op.quantity,
+                select p.code , p.name, p.unit_code , op.quantity,
                 CAST(SUM(COALESCE(bn.inventory_quantity, 0)) AS SIGNED) AS inventory_quantity,
                 p.selling_price, op.discount
                 from `order` o
@@ -30,7 +30,7 @@ public class OrderProductCustomRepositoryImpl implements OrderProductCustomRepos
                 where 1=1
                 """;
         groupBySql.append("""
-                group by op.product_code, op.quantity, p.name, p.unit, p.selling_price, op.discount
+                group by op.product_code, op.quantity, p.name, p.unit_code, p.selling_price, op.discount
                 """);
         StringBuilder whereSQL = new StringBuilder();
         Map<String, Object> params = new HashMap<>();

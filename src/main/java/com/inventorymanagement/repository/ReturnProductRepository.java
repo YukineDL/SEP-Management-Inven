@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ReturnProductRepository extends JpaRepository<ReturnProduct, Integer> {
     List<ReturnProduct> findByReturnFormCode(String returnFormCode);
+    List<ReturnProduct> findByReturnFormCodeIn(List<String> codes);
 }

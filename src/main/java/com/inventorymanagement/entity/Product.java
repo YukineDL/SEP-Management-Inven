@@ -25,8 +25,8 @@ public class Product {
     private String name;
     @Column(name = "description")
     private String description;
-    @Column(name = "unit")
-    private String unit;
+    @Column(name = "unit_code")
+    private String unitCode;
     @Column(name = "sellingPrice")
     private Double sellingPrice;
     @Column(name = "categoryCode")
@@ -46,6 +46,6 @@ public class Product {
         this.brandCode = dto.getBrandCode();
         this.categoryCode = dto.getCategoryCode();
         this.sellingPrice = dto.getSellingPrice();
-        this.unit = dto.getUnit();
+        this.unitCode = dto.getUnit();
     }
 }

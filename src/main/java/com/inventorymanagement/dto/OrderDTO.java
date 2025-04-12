@@ -28,6 +28,8 @@ public class OrderDTO {
     private Employee employee;
     private Customer customer;
     private List<ProductOrderDTO> orderProducts;
+    private String deliveryBy;
+    private LocalDateTime deliveryDate;
     public OrderDTO(Order order) {
         this.code = order.getCode();
         this.deliveryStatus = order.getDeliveryStatus();

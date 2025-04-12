@@ -4,6 +4,7 @@ import com.inventorymanagement.dto.CustomerDTO;
 import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.ICustomerServices;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/customer")
+@SecurityRequirement(name = "bearerAuth")
 @RequiredArgsConstructor
 public class CustomerController {
     private final ICustomerServices customerServices;

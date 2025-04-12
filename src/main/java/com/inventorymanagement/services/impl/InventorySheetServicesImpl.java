@@ -6,19 +6,18 @@ import com.inventorymanagement.dto.InventorySheetDTO;
 import com.inventorymanagement.dto.InventorySheetSearchDTO;
 import com.inventorymanagement.dto.ProductSheetDTO;
 import com.inventorymanagement.dto.ProductSheetSearchReqDTO;
-import com.inventorymanagement.entity.Employee;
-import com.inventorymanagement.entity.InventorySheet;
-import com.inventorymanagement.entity.ProcessCheck;
-import com.inventorymanagement.entity.ProductSheet;
+import com.inventorymanagement.entity.*;
 import com.inventorymanagement.exception.ExceptionMessage;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.repository.InventorySheetRepository;
 import com.inventorymanagement.repository.ProcessCheckRepository;
+import com.inventorymanagement.repository.ProductRepository;
 import com.inventorymanagement.repository.ProductSheetRepository;
 import com.inventorymanagement.repository.custom.IProductSheetCustomRepository;
 import com.inventorymanagement.repository.custom.InventorySheetCustomRepository;
 import com.inventorymanagement.services.IEmployeeServices;
 import com.inventorymanagement.services.IInventorySheetServices;
+import com.inventorymanagement.services.IUnitServices;
 import com.inventorymanagement.utils.ExcelUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -38,6 +37,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +49,8 @@ public class InventorySheetServicesImpl implements IInventorySheetServices {
     private final ProcessCheckRepository processCheckRepository;
     private final ProductSheetRepository productSheetRepository;
     private final InventorySheetCustomRepository inventorySheetCustomRepository;
+    private final IUnitServices unitServices;
+    private final ProductRepository productRepository;
     @Override
     public String createInventorySheet(String authHeader, LocalDate startDate, LocalDate endDate) throws InventoryException {
         Employee me = employeeService.getFullInformation(authHeader);
@@ -107,8 +110,22 @@ public class InventorySheetServicesImpl implements IInventorySheetServices {
                     ExceptionMessage.messages.get(ExceptionMessage.INVENTORY_SHEET_NOT_EXISTED)
             );
         }
+        Pageable fullPage = PageRequest.of(0, Integer.MAX_VALUE);
+        var unitMap = unitServices.getAllUnits(null, fullPage).stream().collect(
+                Collectors.toMap(Unit::getCode, Unit::getName)
+        );
+        var productMap = productRepository.findAll().stream().collect(
+                Collectors.toMap(Product::getCode, Function.identity())
+        );
+        var data = productSheetCustomRepository.getDetailBySearchRequest(dto,pageable);
+        for(ProductSheetDTO item : data.getContent()){
+            var product = productMap.get(item.getProductCode());
+            item.setProductName(product.getName());
+            item.setProductUnit(product.getUnitCode());
+            item.setProductUnitName(unitMap.get(product.getUnitCode()));
+        }
         return InventorySheetDTO.builder()
-                .data(productSheetCustomRepository.getDetailBySearchRequest(dto,pageable))
+                .data(data)
                 .sheet(inventorySheetOp.get())
                 .build();
     }
@@ -120,7 +137,14 @@ public class InventorySheetServicesImpl implements IInventorySheetServices {
 
     @Override
     public byte[] exportExcel(ProductSheetSearchReqDTO dto) throws InventoryException {
+        Pageable fullPage = PageRequest.of(0, Integer.MAX_VALUE);
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        var unitMap = unitServices.getAllUnits(null, fullPage).stream().collect(
+                Collectors.toMap(Unit::getCode, Unit::getName)
+        );
+        var productMap = productRepository.findAll().stream().collect(
+                Collectors.toMap(Product::getCode, Function.identity())
+        );
         var data = productSheetCustomRepository.getDetailBySearchRequest(dto,pageable);
         try (Workbook workbook = new SXSSFWorkbook()) {
             Sheet sheet = workbook.createSheet();
@@ -164,8 +188,8 @@ public class InventorySheetServicesImpl implements IInventorySheetServices {
                 Row row = sheet.createRow(rowCol);
                 AtomicInteger col = new AtomicInteger(0);
                 ExcelUtils.createCell(row, col.getAndIncrement(), item.getProductCode(), rowDataStyle);
-                ExcelUtils.createCell(row, col.getAndIncrement(), item.getProductName(), rowDataStyle);
-                ExcelUtils.createCell(row, col.getAndIncrement(), item.getProductUnit(), rowDataStyle);
+                ExcelUtils.createCell(row, col.getAndIncrement(), productMap.get(item.getProductCode()), rowDataStyle);
+                ExcelUtils.createCell(row, col.getAndIncrement(), unitMap.get(item.getProductUnit()), rowDataStyle);
                 ExcelUtils.createCell(row, col.getAndIncrement(), item.getQuantityShipped(), rowDataStyle);
                 ExcelUtils.createCell(row, col.getAndIncrement(), item.getTotalImportAmount(), rowDataStyle);
                 ExcelUtils.createCell(row, col.getAndIncrement(), item.getProductExportQuantity(), rowDataStyle);

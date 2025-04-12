@@ -1,10 +1,10 @@
 package com.inventorymanagement.controller;
 
-import com.inventorymanagement.constant.Constants;
 import com.inventorymanagement.dto.BrandDTO;
 import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.IBrandServices;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping(value = "/brand")
 @RequiredArgsConstructor
 public class BrandController {

@@ -24,12 +24,13 @@ public class BatchNumberCustomRepositoryImpl implements IBatchNumberCustomReposi
         StringBuilder selectSql = new StringBuilder();
         StringBuilder whereSql = new StringBuilder();
         selectSql.append("""
-                SELECT p.code, p.name, p.unit, p.selling_price,
+                SELECT p.code, p.name, p.unit_code, u.name, p.selling_price,
                 bn.date_of_manufacture, bn.date_expired, bn.location, bn.inventory_quantity, bn.quantity_shipped
                 """);
         whereSql.append("""
                 FROM batch_number bn
                 JOIN product p ON p.code = bn.product_code
+                LEFT JOIN unit u ON u.code = p.unit_code
                 WHERE bn.inventory_receipt_code = :inventoryReceiptCode
                 """);
         sql.append(selectSql).append(whereSql);
@@ -43,6 +44,7 @@ public class BatchNumberCustomRepositoryImpl implements IBatchNumberCustomReposi
             dto.setProductCode(RepositoryUtils.setValue(row[index.getAndIncrement()], String.class));
             dto.setProductName(RepositoryUtils.setValue(row[index.getAndIncrement()], String.class));
             dto.setProductUnit(RepositoryUtils.setValue(row[index.getAndIncrement()], String.class));
+            dto.setProductUnitName(RepositoryUtils.setValue(row[index.getAndIncrement()], String.class));
             dto.setUnitPrice(RepositoryUtils.setValue(row[index.getAndIncrement()], Double.class));
             dto.setDateOfManufacture(RepositoryUtils.setValue(row[index.getAndIncrement()], LocalDate.class));
             dto.setDateExpired(RepositoryUtils.setValue(row[index.getAndIncrement()], LocalDate.class));

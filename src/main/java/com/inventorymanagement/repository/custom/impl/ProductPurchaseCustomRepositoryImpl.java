@@ -20,9 +20,10 @@ public class ProductPurchaseCustomRepositoryImpl implements ProductPurchaseCusto
     public List<ProductPurchaseDTO> findByPurchaseOrderCode(String purchaseOrderCode) {
         StringBuilder sql = new StringBuilder();
         String selectSQL = """
-                select p.code, p.name, p.unit, ppo.quantity
+                select p.code, p.name, p.unit_code,u.name, ppo.quantity
                 from product_purchase_order ppo
                 join product p on p.code = ppo.product_code
+                left join unit u on u.code = p.unit_code
                 where 1=1
                 """;
         StringBuilder whereSQL = new StringBuilder();

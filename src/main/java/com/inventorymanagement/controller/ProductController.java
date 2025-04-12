@@ -6,6 +6,7 @@ import com.inventorymanagement.dto.response.ApiResponse;
 import com.inventorymanagement.exception.ExceptionMessage;
 import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.services.IProductServices;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
@@ -22,6 +23,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping(value = "/products")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class ProductController {
     private final IProductServices productServices;
     @PostMapping(value = "/create")
@@ -49,11 +51,12 @@ public class ProductController {
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "categoryCode", required = false) String categoryCode,
             @RequestParam(name = "brandCode", required = false) String brandCode,
+            @RequestParam(name = "unitCode", required = false) String unitCode,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ){
         try {
-            ProductSearchDTO searchDTO = new ProductSearchDTO(name,code,categoryCode,brandCode);
+            ProductSearchDTO searchDTO = new ProductSearchDTO(name,code,categoryCode,brandCode, unitCode);
             Pageable pageable = PageRequest.of(page, size);
             return new ResponseEntity<>(
                     productServices.findAllBySearchRequest(searchDTO,pageable),

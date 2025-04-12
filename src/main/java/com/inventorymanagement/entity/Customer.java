@@ -23,10 +23,16 @@ public class Customer {
     private String address;
     @Column(name = "phone_number")
     private String phoneNumber;
+    @Column(name = "email")
+    private String email;
+    @Column(name = "website")
+    private String website;
 
     public void updateCustomer(CustomerDTO dto) {
         this.name = dto.getName();
         this.address = dto.getAddress();
         this.phoneNumber = dto.getPhoneNumber();
+        this.email = dto.getEmail();
+        this.website = dto.getWebsite();
     }
 }
