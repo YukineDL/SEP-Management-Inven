@@ -46,4 +46,6 @@ public class InventoryDelivery {
     private LocalDateTime approveDate;
     @Column(name = "employee_code")
     private String employeeCode;
+    @Column(name = "return_form_code")
+    private String returnFormCode;
 }

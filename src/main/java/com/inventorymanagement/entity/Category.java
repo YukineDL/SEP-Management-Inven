@@ -20,4 +20,6 @@ public class Category {
     private String code;
     @Column(name = "name")
     private String name;
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
 }

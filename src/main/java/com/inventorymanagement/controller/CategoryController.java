@@ -94,4 +94,19 @@ public class CategoryController {
                 HttpStatus.OK
         );
     }
+    @DeleteMapping(value = "/delete/{code}")
+    public ResponseEntity<Object> deleteByCode(@PathVariable String code) {
+        try {
+            categoryServices.deleteByCode(code);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        } catch (InventoryException e){
+            return new ResponseEntity<>(
+                    ApiResponse.builder()
+                            .codeMessage(e.getCodeMessage())
+                            .message(e.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
 }

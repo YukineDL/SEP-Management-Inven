@@ -1,6 +1,7 @@
 package com.inventorymanagement.controller;
 
 import com.inventorymanagement.constant.Constants;
+import com.inventorymanagement.dto.EmployeePasswordUpdateDTO;
 import com.inventorymanagement.dto.EmployeeSearchDTO;
 import com.inventorymanagement.dto.EmployeeUpdateDTO;
 import com.inventorymanagement.dto.response.ApiResponse;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -114,6 +116,25 @@ public class EmployeeController {
                     ApiResponse.builder()
                             .code(HttpStatus.BAD_REQUEST)
                             .message(exception.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+    @PutMapping(value = "/update-password/{code}")
+    public ResponseEntity<Object> updatePassword(@PathVariable String code,
+                                                 HttpServletRequest request,
+                                                 @RequestBody EmployeePasswordUpdateDTO employeePasswordUpdateDTO
+                                                 ){
+        try {
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            employeeServices.updatePasswordForEmployee(authHeader,code,employeePasswordUpdateDTO);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        } catch (InventoryException e){
+            return new ResponseEntity<>(
+                    ApiResponse.builder()
+                            .code(HttpStatus.BAD_REQUEST)
+                            .message(e.getMessage())
                             .build(),
                     HttpStatus.BAD_REQUEST
             );

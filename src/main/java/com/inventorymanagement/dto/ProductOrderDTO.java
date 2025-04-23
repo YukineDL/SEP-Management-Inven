@@ -16,4 +16,5 @@ public class ProductOrderDTO {
     private Long inventoryQuantity;
     private Double sellingPrice;
     private float discount;
+    private String imagePath;
 }

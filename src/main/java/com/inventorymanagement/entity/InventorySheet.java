@@ -28,4 +28,6 @@ public class InventorySheet {
     private LocalDate startDate;
     @Column(name = "end_date")
     private LocalDate endDate;
+    @Column(name = "is_review")
+    private Boolean isReview;
 }

@@ -49,6 +49,7 @@ public class InventoryDeliveryController {
                                           @RequestParam(required = false)Double totalAmountTo,
                                           @RequestParam(required = false)Double totalAmountFrom,
                                           @RequestParam(required = false)Integer customerId,
+                                          @RequestParam(required = false) String deliveryType,
                                           @RequestParam(name = "page", defaultValue = "0") int page,
                                           @RequestParam(name = "size", defaultValue = "10") int size){
         try {
@@ -61,6 +62,7 @@ public class InventoryDeliveryController {
                     .toDate(toDate)
                     .customerId(customerId)
                     .approveStatus(approveStatus)
+                    .deliveryType(deliveryType)
                     .build();
             return new ResponseEntity<>(inventoryDeliveryServices.findBySearchRequest(searchReqDTO,pageable),HttpStatus.OK);
         } catch (Exception e){
@@ -108,6 +110,23 @@ public class InventoryDeliveryController {
                     inventoryDeliveryServices.findByCode(inventoryDeliveryCode),
                     HttpStatus.OK
             );
+        } catch (InventoryException e){
+            return new ResponseEntity<>(
+                    ApiResponse.builder()
+                            .codeMessage(e.getCodeMessage())
+                            .message(e.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+    @PostMapping(value = "/return/{returnFormCode}")
+    public ResponseEntity<Object> createDeliveryForReturnForm(@PathVariable String returnFormCode,
+                                                              HttpServletRequest request){
+        try {
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            inventoryDeliveryServices.createInventoryDeliveryReturn(authHeader,returnFormCode);
+            return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (InventoryException e){
             return new ResponseEntity<>(
                     ApiResponse.builder()

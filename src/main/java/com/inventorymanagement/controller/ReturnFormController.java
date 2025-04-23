@@ -82,6 +82,7 @@ public class ReturnFormController {
                                                     @RequestParam(required = false) Integer customerId,
                                                     @RequestParam(required = false) Double amountFrom,
                                                     @RequestParam(required = false) Double amountTo,
+                                                    @RequestParam(required = false) String approveStatus,
                                                     HttpServletRequest request) {
        try {
            String authHeader = request.getHeader("Authorization");
@@ -93,6 +94,7 @@ public class ReturnFormController {
                    .customerId(customerId)
                    .amountFrom(amountFrom)
                    .amountTo(amountTo)
+                   .approveStatus(approveStatus)
                    .build();
            Pageable pageable = PageRequest.of(page,size);
            return new ResponseEntity<>(returnFormServices.findBySearchRequest(dto, pageable, authHeader),

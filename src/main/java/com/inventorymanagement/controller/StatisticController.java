@@ -18,11 +18,25 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class StatisticController {
     private final IStatisticServices statisticServices;
-    @GetMapping()
-    public ResponseEntity<Object> getStatistic(@RequestParam(required = false) Integer year) {
+    @GetMapping(value = "/delivery")
+    public ResponseEntity<Object> getDeliveryStatistic(@RequestParam(required = false) Integer year) {
         if(year == null){
             year = LocalDate.now().getYear();
         }
-        return new ResponseEntity<>(statisticServices.getDataStatistics(year), HttpStatus.OK);
+        return new ResponseEntity<>(statisticServices.getDataDeliveryStatistics(year), HttpStatus.OK);
+    }
+    @GetMapping(value = "/return")
+    public ResponseEntity<Object> getReturnStatistic(@RequestParam(required = false) Integer year) {
+        if(year == null){
+            year = LocalDate.now().getYear();
+        }
+        return new ResponseEntity<>(statisticServices.getDataReturnStatistics(year), HttpStatus.OK);
+    }
+    @GetMapping(value = "/receipt")
+    public ResponseEntity<Object> getReceiptStatistic(@RequestParam(required = false) Integer year) {
+        if(year == null){
+            year = LocalDate.now().getYear();
+        }
+        return new ResponseEntity<>(statisticServices.getDataReceiptStatistics(year), HttpStatus.OK);
     }
 }

@@ -15,11 +15,12 @@ public class EmployeeDTO {
     private String name;
     private String phoneNumber;
     private String username;
-
+    private String password;
     public EmployeeDTO(Employee employee) {
         this.code = employee.getCode();
         this.name = employee.getName();
         this.phoneNumber = employee.getPhoneNumber();
         this.username = employee.getUsername();
+        this.password = employee.getPassword();
     }
 }

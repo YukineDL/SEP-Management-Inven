@@ -53,6 +53,9 @@ public class ExceptionMessage {
     public static String INVENTORY_SHEET_NOT_EXISTED = "INVENTORY_SHEET_NOT_EXISTED";
     public static String UNIT_CODE_SAME = "UNIT_CODE_SAME";
     public static String UNIT_NOT_EXISTED = "UNIT_NOT_EXISTED";
+    public static String UPDATE_PASSWORD_FAIL = "UPDATE_PASSWORD_FAIL";
+    public static String RETURN_PRODUCT_BROKEN = "RETURN_PRODUCT_BROKEN";
+    public static String PHONE_NUMBER_EXISTED = "PHONE_NUMBER_EXISTED";
 
     static {
         messages.put(EXISTED_EMPLOYEE, "Nhân viên đã tồn tại");
@@ -69,7 +72,7 @@ public class ExceptionMessage {
         messages.put(BRAND_NOT_EXISTED, "Hãng này không tồn tại");
         messages.put(BRAND_NAME_EMPTY, "Tên hãng không được để trống ");
         messages.put(PRODUCT_NAME_EMPTY, "Tên sản phẩm không được để trống ");
-        messages.put(PRODUCT_UNIT_EMPTY, "Đơn vị tính cảu sản phẩm không thể để trống");
+        messages.put(PRODUCT_UNIT_EMPTY, "Đơn vị tính của sản phẩm không thể để trống");
         messages.put(PRODUCT_SELLING_PRICE_EMPTY, "Giá bán sản phẩm đang để trống ");
         messages.put(PRODUCT_CATEGORY_CODE_EMPTY, "Danh mục sản phẩm đang để trống ");
         messages.put(PRODUCT_BRAND_CODE_EMPTY, "Hãng sản phẩm đang để trống ");
@@ -102,5 +105,8 @@ public class ExceptionMessage {
         messages.put(INVENTORY_SHEET_EXISTED_TIME, "Phiếu kiểm kê không tồn tại");
         messages.put(UNIT_CODE_SAME, "Đơn vị tính đã tồn tại");
         messages.put(UNIT_NOT_EXISTED, "Đơn vị tính không tồn tại");
+        messages.put(UPDATE_PASSWORD_FAIL, "Mật khẩu cũ không chính xác");
+        messages.put(RETURN_PRODUCT_BROKEN, "Đơn hàng không có sản phẩm hỏng");
+        messages.put(PHONE_NUMBER_EXISTED, "Số điện thoại đã tồn tại");
     }
 }

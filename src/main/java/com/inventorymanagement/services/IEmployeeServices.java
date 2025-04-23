@@ -1,6 +1,7 @@
 package com.inventorymanagement.services;
 
 import com.inventorymanagement.dto.EmployeeDTO;
+import com.inventorymanagement.dto.EmployeePasswordUpdateDTO;
 import com.inventorymanagement.dto.EmployeeSearchDTO;
 import com.inventorymanagement.dto.EmployeeUpdateDTO;
 import com.inventorymanagement.entity.Employee;
@@ -17,4 +18,6 @@ public interface IEmployeeServices {
     void lockAccount(String authHeader, String employeeCode) throws InventoryException;
     void unlockAccount(String authHeader, String employeeCode) throws InventoryException;
     EmployeeDTO findByCode(String code) throws InventoryException;
+
+    void updatePasswordForEmployee(String authHeader, String code, EmployeePasswordUpdateDTO dto) throws InventoryException;
 }

@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -85,11 +86,13 @@ public class InventorySheetController {
     public ResponseEntity<Object> findAllInventorySheets(@RequestParam(name = "page", defaultValue = "0") int page,
                                                          @RequestParam(name = "size", defaultValue = "10") int size,
                                                          @RequestParam(required = false) LocalDate startDate,
-                                                         @RequestParam(required = false) LocalDate endDate) {
+                                                         @RequestParam(required = false) LocalDate endDate,
+                                                         @RequestParam(required = false) Boolean isReview) {
         Pageable pageable = PageRequest.of(page, size);
         InventorySheetSearchDTO searchDTO = InventorySheetSearchDTO.builder()
                 .startDate(startDate)
                 .endDate(endDate)
+                .isReview(isReview)
                 .build();
         return new ResponseEntity<>(
                 inventorySheetServices.findBySearchRequest(pageable,searchDTO),
@@ -122,6 +125,23 @@ public class InventorySheetController {
                     inventorySheetServices.exportExcel(searchReqDTO),
                     HttpStatus.OK
             );
+        } catch (InventoryException e){
+            return new ResponseEntity<>(
+                    ApiResponse.builder()
+                            .codeMessage(e.getCodeMessage())
+                            .message(e.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+    @PutMapping(value = "/review/{code}")
+    public ResponseEntity<Object> reviewSheet(@PathVariable String code,
+                                              HttpServletRequest request){
+        try {
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            inventorySheetServices.reviewInventorySheet(authHeader,code);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
         } catch (InventoryException e){
             return new ResponseEntity<>(
                     ApiResponse.builder()

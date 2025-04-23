@@ -22,7 +22,7 @@ public class OrderProductCustomRepositoryImpl implements OrderProductCustomRepos
         String selectSQL = """
                 select p.code , p.name, p.unit_code , op.quantity,
                 CAST(SUM(COALESCE(bn.inventory_quantity, 0)) AS SIGNED) AS inventory_quantity,
-                p.selling_price, op.discount
+                p.selling_price, op.discount, p.image_path
                 from `order` o
                 JOIN order_product op on op.order_code = o.code
                 JOIN product p on p.code = op.product_code
@@ -30,7 +30,7 @@ public class OrderProductCustomRepositoryImpl implements OrderProductCustomRepos
                 where 1=1
                 """;
         groupBySql.append("""
-                group by op.product_code, op.quantity, p.name, p.unit_code, p.selling_price, op.discount
+                group by op.product_code, op.quantity, p.name, p.unit_code, p.selling_price, op.discount, p.image_path
                 """);
         StringBuilder whereSQL = new StringBuilder();
         Map<String, Object> params = new HashMap<>();
@@ -51,6 +51,7 @@ public class OrderProductCustomRepositoryImpl implements OrderProductCustomRepos
             dto.setInventoryQuantity(RepositoryUtils.setValue(object[index.getAndIncrement()], Long.class));
             dto.setSellingPrice(RepositoryUtils.setValue(object[index.getAndIncrement()], Double.class));
             dto.setDiscount((Float) RepositoryUtils.setValue(object[index.getAndIncrement()], Number.class));
+            dto.setImagePath(RepositoryUtils.setValue(object[index.getAndIncrement()], String.class));
             productOrderDTOS.add(dto);
         }
         return productOrderDTOS;

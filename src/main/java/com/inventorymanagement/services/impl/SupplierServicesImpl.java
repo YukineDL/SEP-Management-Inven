@@ -21,6 +21,12 @@ public class SupplierServicesImpl implements ISupplierServices {
     @Override
     public void create(SupplierDTO dto) throws InventoryException {
         validateDTO(dto);
+        if(supplierRepository.existsByPhoneNumber(dto.getPhoneNumber())){
+            throw new InventoryException(
+                    ExceptionMessage.PHONE_NUMBER_EXISTED,
+                    ExceptionMessage.messages.get(ExceptionMessage.PHONE_NUMBER_EXISTED)
+            );
+        }
         Supplier supplier = new Supplier(dto);
         supplier.setIsDeleted(false);
         supplierRepository.save(supplier);
@@ -37,6 +43,12 @@ public class SupplierServicesImpl implements ISupplierServices {
         }
         validateDTO(dto);
         Supplier supplier = supplierOP.get();
+        if(supplierRepository.existsByPhoneNumberAndPhoneNumberNot(dto.getPhoneNumber(), supplier.getPhoneNumber())){
+            throw new InventoryException(
+                    ExceptionMessage.PHONE_NUMBER_EXISTED,
+                    ExceptionMessage.messages.get(ExceptionMessage.PHONE_NUMBER_EXISTED)
+            );
+        }
         supplier.updateSupplier(dto);
         supplierRepository.save(supplier);
     }

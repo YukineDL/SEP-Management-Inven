@@ -26,7 +26,7 @@ public class ReturnForm {
     private LocalDateTime createAt;
     @Column(name = "create_by")
     private String createBy;
-    @Column(name = "isUsed")
+    @Column(name = "is_used")
     private Boolean isUsed;
     @Column(name = "approve_status")
     private String approveStatus;

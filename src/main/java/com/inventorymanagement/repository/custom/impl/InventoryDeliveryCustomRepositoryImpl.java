@@ -33,7 +33,7 @@ public class InventoryDeliveryCustomRepositoryImpl implements InventoryDeliveryC
         StringBuilder countSql = new StringBuilder();
         sqlSelect.append("""
                 Select id.code, id.customer_id, id.approve_status, id.approve_by, id.approve_date, id.tax_number,
-                id.total_amount, id.tax_export_gtgt, id.create_at, id.employee_code
+                id.total_amount, id.tax_export_gtgt, id.create_at, id.employee_code, id.delivery_type
                 """);
         whereSql.append("""
                 from inventory_delivery id
@@ -74,6 +74,7 @@ public class InventoryDeliveryCustomRepositoryImpl implements InventoryDeliveryC
             item.setTaxExportGtGt((Float) RepositoryUtils.setValue(row[index.getAndIncrement()], Number.class));
             item.setCreateAt(RepositoryUtils.setValue(row[index.getAndIncrement()], LocalDateTime.class));
             item.setEmployeeCode(RepositoryUtils.setValue(row[index.getAndIncrement()], String.class));
+            item.setDeliveryType(RepositoryUtils.setValue(row[index.getAndIncrement()], String.class));
             results.add(item);
         }
         return new PageImpl<>(results, pageable,(Long)count.getSingleResult());
@@ -113,6 +114,10 @@ public class InventoryDeliveryCustomRepositoryImpl implements InventoryDeliveryC
         if(!Objects.isNull(reqDTO.getTotalAmountFrom())){
             whereClause.append(" and id.total_amount >= :totalAmountFrom ");
             params.put("totalAmountFrom", reqDTO.getTotalAmountFrom());
+        }
+        if(!Objects.isNull(reqDTO.getDeliveryType())){
+            whereClause.append(" and id.delivery_type >= :deliveryType ");
+            params.put("deliveryType", reqDTO.getDeliveryType());
         }
     }
     private void setParams(Query query, Map<String, Object> params){

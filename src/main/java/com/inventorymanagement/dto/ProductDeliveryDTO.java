@@ -14,5 +14,5 @@ public class ProductDeliveryDTO {
     private String productCode;
     private Long exportQuantity;
     private Double priceExport;
-    private Product product;
+    private ProductDTO product;
 }

@@ -41,6 +41,7 @@ public class CategoryServicesImpl implements ICategoryServices {
         Category category = Category.builder()
                 .name(categoryDTO.getName())
                 .code(Utils.convertToCode(categoryDTO.getName()))
+                .isDeleted(false)
                 .build();
         if(categoryRepository.existsByCode(category.getCode())){
             throw new InventoryException(
@@ -81,7 +82,7 @@ public class CategoryServicesImpl implements ICategoryServices {
 
     @Override
     public Page<Category> getAll(Pageable pageable) {
-        var content = categoryRepository.findAll(pageable);
+        var content = categoryRepository.findByIsDeletedOrIsDeletedIsNull(false,pageable);
         return new PageImpl<>(content.getContent(), pageable, content.getTotalElements());
     }
 
@@ -95,6 +96,13 @@ public class CategoryServicesImpl implements ICategoryServices {
             );
         }
         return categoryOp.get();
+    }
+
+    @Override
+    public void deleteByCode(String code) throws InventoryException {
+        var category = this.findByCode(code);
+        category.setIsDeleted(true);
+        categoryRepository.save(category);
     }
 
     private boolean validateDTO(CategoryDTO categoryDTO){

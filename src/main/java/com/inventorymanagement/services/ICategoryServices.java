@@ -11,4 +11,5 @@ public interface ICategoryServices {
     void update(String authHeader, CategoryDTO categoryDTO, String categoryCode) throws InventoryException;
     Page<Category> getAll(Pageable pageable);
     Category findByCode(String code) throws InventoryException;
+    void deleteByCode(String code) throws InventoryException;
 }

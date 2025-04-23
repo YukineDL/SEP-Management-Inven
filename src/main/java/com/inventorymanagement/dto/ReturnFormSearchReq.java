@@ -19,4 +19,5 @@ public class ReturnFormSearchReq {
     private Integer customerId;
     private Double amountTo;
     private Double amountFrom;
+    private String approveStatus;
 }

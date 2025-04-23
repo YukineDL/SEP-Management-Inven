@@ -1,6 +1,7 @@
 package com.inventorymanagement.services.impl;
 
 import com.inventorymanagement.dto.EmployeeDTO;
+import com.inventorymanagement.dto.EmployeePasswordUpdateDTO;
 import com.inventorymanagement.dto.EmployeeSearchDTO;
 import com.inventorymanagement.repository.custom.EmployeeRepositoryCustom;
 import com.inventorymanagement.utils.SecurityUtils;
@@ -13,9 +14,11 @@ import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.repository.EmployeeRepository;
 import com.inventorymanagement.services.IEmployeeServices;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -34,6 +37,7 @@ public class EmployeeServicesImpl implements IEmployeeServices {
     private final EmployeeRepository employeeRepository;
     private final SecurityUtils securityUtils;
     private final EmployeeRepositoryCustom employeeRepositoryCustom;
+    private final PasswordEncoder passwordEncoder;
     private final List<String> LIST_MANAGER = new ArrayList<>(List.of(RoleEnum.ADMIN.name(),
             RoleEnum.MANAGER.name()));
     @Override
@@ -146,5 +150,41 @@ public class EmployeeServicesImpl implements IEmployeeServices {
             );
         }
         return new EmployeeDTO(employeeOP.get());
+    }
+
+    @Override
+    public void updatePasswordForEmployee(String authHeader, String code, EmployeePasswordUpdateDTO dto) throws InventoryException {
+        Employee me = this.getFullInformation(authHeader);
+        if(me == null){
+            throw new InventoryException(
+                    ExceptionMessage.NO_PERMISSION,
+                    ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
+            );
+        }
+        var employeeOP = employeeRepository.findByCode(code);
+        if(employeeOP.isEmpty()){
+            throw new InventoryException(
+                    ExceptionMessage.EMPLOYEE_NOT_EXISTED,
+                    ExceptionMessage.messages.get(ExceptionMessage.EMPLOYEE_NOT_EXISTED)
+            );
+        }
+        var employee = employeeOP.get();
+        if (!me.getRoleCode().equals(RoleEnum.ADMIN.name())) {
+            if (!BooleanUtils.isTrue(code.equals(me.getCode()))) {
+                throw new InventoryException(
+                        ExceptionMessage.NO_PERMISSION,
+                        ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
+                );
+            }
+            Boolean isMatch = passwordEncoder.matches(dto.getOldPassword(), me.getPassword());
+            if (!BooleanUtils.isTrue(isMatch)) {
+                throw new InventoryException(
+                        ExceptionMessage.UPDATE_PASSWORD_FAIL,
+                        ExceptionMessage.messages.get(ExceptionMessage.UPDATE_PASSWORD_FAIL)
+                );
+            }
+        }
+        employee.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        employeeRepository.save(employee);
     }
 }

@@ -1,7 +1,9 @@
 package com.inventorymanagement.constant;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Constants {
     public static String HEADER_AUTHORIZATION = "Authorization";
@@ -34,4 +36,19 @@ public class Constants {
     public static String STATUS_IMPORT_SUCCESS = "IMPORT_SUCCESS";
     public static String BATCH_NUMBER_AVAILABLE = "AVAILABLE";
     public static String BATCH_NUMBER_OUT_OF_STOCK = "OUT_OF_STOCK";
+    public static Map<String, String> STATUS_BATCH = new HashMap<>();
+    static {
+        STATUS_BATCH.put(
+                PRODUCT_STATUS.NEW.name(),
+                "Mới"
+        );
+        STATUS_BATCH.put(
+                PRODUCT_STATUS.OLD.name(),
+                "Cũ"
+        );
+        STATUS_BATCH.put(
+                PRODUCT_STATUS.BROKEN.name(),
+                "Hỏng"
+        );
+    }
 }

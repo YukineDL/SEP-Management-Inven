@@ -13,7 +13,17 @@ import java.util.List;
 public class StatisticServicesImpl implements IStatisticServices {
     private final StatisticCustomRepository statisticCustomRepository;
     @Override
-    public List<StatisticOrderDTO> getDataStatistics(Integer year) {
+    public List<StatisticOrderDTO> getDataDeliveryStatistics(Integer year) {
         return statisticCustomRepository.getDataStatistics(year);
+    }
+
+    @Override
+    public List<StatisticOrderDTO> getDataReceiptStatistics(Integer year) {
+        return statisticCustomRepository.getDataReceiptStatistics(year);
+    }
+
+    @Override
+    public List<StatisticOrderDTO> getDataReturnStatistics(Integer year) {
+        return statisticCustomRepository.getDataReturnStatistics(year);
     }
 }

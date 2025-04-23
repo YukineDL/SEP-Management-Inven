@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class StatisticOrderDTO {
     private int month;
-    private int totalOrderInMonth;
+    private int totalFormInMonth;
+    private Double totalAmount;
 }

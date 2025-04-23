@@ -63,4 +63,19 @@ public class BrandController {
                 HttpStatus.OK
         );
     }
+    @GetMapping(value = "/delete/{code}")
+    public ResponseEntity<Object> delete(@PathVariable String code) {
+        try {
+            brandServices.deleteByCode(code);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        } catch (InventoryException e){
+            return new ResponseEntity<>(
+                    ApiResponse.builder()
+                            .codeMessage(e.getCodeMessage())
+                            .message(e.getMessage())
+                            .build(),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
 }

@@ -19,4 +19,5 @@ public class InventoryDeliverySearchReqDTO {
     private Double totalAmountTo;
     private Double totalAmountFrom;
     private String approveStatus;
+    private String deliveryType;
 }

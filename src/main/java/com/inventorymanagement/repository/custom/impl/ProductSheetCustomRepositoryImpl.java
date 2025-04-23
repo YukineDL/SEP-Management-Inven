@@ -38,7 +38,7 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
                 bn.status,
                 CAST(SUM(COALESCE(bn.export_quantity, 0)) AS SIGNED) AS export_quantity ,
                 SUM(bn.import_price * bn.quantity_shipped) as total_import_amount,
-                CAST(SUM(COALESCE(bn.inventoryQuantity, 0)) AS SIGNED) AS total_inventory_quantity
+                CAST(SUM(COALESCE(bn.inventory_quantity, 0)) AS SIGNED) AS total_inventory_quantity
             FROM
                 batch_number bn
             WHERE
@@ -122,7 +122,8 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
         StringBuilder countSql = new StringBuilder();
         selectSql.append("""
                 SELECT ps.product_code, ps.product_status,ps.quantity_shipped ,
-                ps.total_import_amount, ps.product_export_quantity, ps.total_export_amount, ps.total_inventory_quantity
+                ps.total_import_amount, ps.product_export_quantity, ps.total_export_amount, ps.total_inventory_quantity,
+                p.unit_code
                 """);
         whereSql.append("""
                 FROM product_sheet ps
@@ -157,6 +158,7 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
             productSheetDTO.setExportTotalAmount(RepositoryUtils.setValue(row[index.getAndIncrement()],Double.class));
             productSheetDTO.setTotalInventoryQuantity(
                     Long.valueOf(RepositoryUtils.setValue(row[index.getAndIncrement()],Integer.class)));
+            productSheetDTO.setProductUnit(RepositoryUtils.setValue(row[index.getAndIncrement()], String.class));
             productSheetDTOS.add(productSheetDTO);
         }
         return new PageImpl<>(productSheetDTOS, pageable, (Long)count.getSingleResult());

@@ -44,6 +44,7 @@ public class BrandServicesImpl implements IBrandServices {
         Brand brand = Brand.builder()
                 .code(Utils.createCode(brandDTO.getBrandName()))
                 .name(brandDTO.getBrandName())
+                .isDeleted(false)
                 .build();
         if(brandRepository.existsByCode(brand.getCode())){
             throw new InventoryException(
@@ -93,7 +94,21 @@ public class BrandServicesImpl implements IBrandServices {
 
     @Override
     public Page<Brand> findAll(Pageable pageable)   {
-        var content = brandRepository.findAll(pageable);
+        var content = brandRepository.findByIsDeletedOrIsDeletedIsNull(false,pageable);
         return new PageImpl<>(content.getContent(), pageable, content.getTotalElements());
+    }
+
+    @Override
+    public void deleteByCode(String code) throws InventoryException {
+        var brandOp = this.brandRepository.findByCode(code);
+        if(brandOp.isEmpty()){
+            throw new InventoryException(
+                    ExceptionMessage.BRAND_NOT_EXISTED,
+                    ExceptionMessage.messages.get(ExceptionMessage.BRAND_NOT_EXISTED)
+            );
+        }
+        var brand = brandOp.get();
+        brand.setIsDeleted(true);
+        brandRepository.save(brand);
     }
 }

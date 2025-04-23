@@ -28,4 +28,5 @@ public class InventoryDeliveryDTO {
     private List<ProductDeliveryDTO> products;
     private String employeeCode;
     private Employee employee;
+    private String deliveryType;
 }

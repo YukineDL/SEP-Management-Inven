@@ -39,5 +39,7 @@ public class OrderDTO {
         this.createAt = order.getCreateAt();
         this.employeeCode = order.getEmployeeCode();
         this.customerId = order.getCustomerId();
+        this.deliveryBy = order.getDeliveryBy();
+        this.deliveryDate = order.getDeliveryDate();
     }
 }

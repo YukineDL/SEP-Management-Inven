@@ -15,5 +15,6 @@ public interface IInventorySheetServices {
     String createInventorySheet(String authHeader, LocalDate startDate, LocalDate endDate) throws InventoryException;
     InventorySheetDTO getDetailInventorySheetBySearchRequest(Pageable pageable, ProductSheetSearchReqDTO dto) throws InventoryException;
     Page<InventorySheet> findBySearchRequest(Pageable pageable, InventorySheetSearchDTO dto) ;
+    void reviewInventorySheet(String authHeader, String code) throws InventoryException;
     byte[] exportExcel(ProductSheetSearchReqDTO dto) throws InventoryException;
 }

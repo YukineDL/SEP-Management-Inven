@@ -14,6 +14,7 @@ public interface IInventoryDeliveryServices {
     void createInventoryDeliveryByOrderCode(String authHeader, String orderCode, InventoryDeliveryCreateDTO dto) throws InventoryException;
     void approveInventoryDelivery(String authHeader, String inventoryDeliveryCode) throws InventoryException;
     void rejectInventoryDelivery(String authHeader, String inventoryDeliveryCode) throws InventoryException;
-    Page<InventoryDeliveryDTO> findBySearchRequest(InventoryDeliverySearchReqDTO reqDTO, Pageable pageable);
+    Page<InventoryDeliveryDTO> findBySearchRequest(InventoryDeliverySearchReqDTO reqDTO, Pageable pageable) throws InventoryException;
     InventoryDeliveryDTO findByCode(String inventoryDeliveryCode) throws InventoryException;
+    void createInventoryDeliveryReturn(String authHeader, String returnCode) throws InventoryException;
 }

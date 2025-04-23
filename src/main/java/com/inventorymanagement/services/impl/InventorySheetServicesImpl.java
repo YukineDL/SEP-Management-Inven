@@ -24,6 +24,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -73,6 +75,7 @@ public class InventorySheetServicesImpl implements IInventorySheetServices {
                 .endDate(endDate)
                 .createAt(LocalDate.now())
                 .employeeCode(me.getCode())
+                .isReview(false)
                 .build();
         inventorySheetRepository.save(inventorySheet);
         String key = UUID.randomUUID().toString();
@@ -136,16 +139,36 @@ public class InventorySheetServicesImpl implements IInventorySheetServices {
     }
 
     @Override
+    public void reviewInventorySheet(String authHeader, String code) throws InventoryException {
+        Employee me = employeeService.getFullInformation(authHeader);
+        if(me == null || me.getRoleCode().equals(RoleEnum.SALE.name())){
+            throw new InventoryException(
+                    ExceptionMessage.NO_PERMISSION,
+                    ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
+            );
+        }
+        var inventorySheetOp = inventorySheetRepository.findByCode(code);
+        if(inventorySheetOp.isEmpty()){
+            throw new InventoryException(
+                    ExceptionMessage.INVENTORY_SHEET_NOT_EXISTED,
+                    ExceptionMessage.messages.get(ExceptionMessage.INVENTORY_SHEET_NOT_EXISTED)
+            );
+        }
+        var inventorySheet = inventorySheetOp.get();
+        inventorySheet.setIsReview(true);
+        inventorySheetRepository.save(inventorySheet);
+    }
+
+    @Override
     public byte[] exportExcel(ProductSheetSearchReqDTO dto) throws InventoryException {
         Pageable fullPage = PageRequest.of(0, Integer.MAX_VALUE);
-        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
         var unitMap = unitServices.getAllUnits(null, fullPage).stream().collect(
                 Collectors.toMap(Unit::getCode, Unit::getName)
         );
         var productMap = productRepository.findAll().stream().collect(
-                Collectors.toMap(Product::getCode, Function.identity())
+                Collectors.toMap(Product::getCode, Product::getName)
         );
-        var data = productSheetCustomRepository.getDetailBySearchRequest(dto,pageable);
+        var data = productSheetCustomRepository.getDetailBySearchRequest(dto,fullPage);
         try (Workbook workbook = new SXSSFWorkbook()) {
             Sheet sheet = workbook.createSheet();
             var headerStyle = ExcelUtils.setCellStyle(
@@ -181,6 +204,9 @@ public class InventorySheetServicesImpl implements IInventorySheetServices {
             ExcelUtils.createCell(headerRow, 7, "Trạng thái", headerStyle);
             sheet.addMergedRegion(new CellRangeAddress(0, 1, 7, 7));
 
+            ExcelUtils.createCell(headerRow, 8, "Tồn kho", headerStyle);
+            sheet.addMergedRegion(new CellRangeAddress(0, 1, 8, 8));
+
             ExcelUtils.applyBordersToMergedCells(sheet);
             var rowDataStyle = ExcelUtils.setCellStyle(workbook, IndexedColors.BLACK.getIndex(), false, false, 11, VerticalAlignment.CENTER, HorizontalAlignment.CENTER);
             int rowCol = 2;
@@ -194,7 +220,8 @@ public class InventorySheetServicesImpl implements IInventorySheetServices {
                 ExcelUtils.createCell(row, col.getAndIncrement(), item.getTotalImportAmount(), rowDataStyle);
                 ExcelUtils.createCell(row, col.getAndIncrement(), item.getProductExportQuantity(), rowDataStyle);
                 ExcelUtils.createCell(row, col.getAndIncrement(), item.getExportTotalAmount(), rowDataStyle);
-                ExcelUtils.createCell(row, col.getAndIncrement(), item.getProductStatus(), rowDataStyle);
+                ExcelUtils.createCell(row, col.getAndIncrement(), Constants.STATUS_BATCH.get(item.getProductStatus()), rowDataStyle);
+                ExcelUtils.createCell(row,col.getAndIncrement(), item.getTotalInventoryQuantity(),rowDataStyle);
                 rowCol++;
             }
             ByteArrayOutputStream bos = new ByteArrayOutputStream();

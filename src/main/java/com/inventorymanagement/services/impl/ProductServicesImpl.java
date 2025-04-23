@@ -159,13 +159,13 @@ public class ProductServicesImpl implements IProductServices {
         List<Product> content = productRepository.findAll();
         var pageable = PageRequest.of(0, Integer.MAX_VALUE);
         var unitMap = unitServices.getAllUnits(null,pageable).stream().collect(
-                Collectors.toMap(Unit::getCode, unit -> unit)
+                Collectors.toMap(Unit::getCode, Unit::getName)
         );
         for (Product item : content){
             ProductDTO dto = new ProductDTO(item);
             dto.setBrandName(brandMapValue.get(dto.getBrandCode()).getName());
             dto.setCategoryName(categoryMapValue.get(dto.getCategoryCode()).getName());
-            dto.setUnitName(unitMap.get(item.getUnitCode()).getName());
+            dto.setUnitName(unitMap.get(item.getUnitCode()));
             if(mapCategoryProduct.containsKey(item.getCategoryCode())){
                 mapCategoryProduct.get(item.getCategoryCode()).add(dto);
             }else{

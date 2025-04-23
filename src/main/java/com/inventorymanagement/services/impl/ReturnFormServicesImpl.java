@@ -41,7 +41,7 @@ public class ReturnFormServicesImpl implements IReturnFormServices {
     private final EmployeeRepository employeeRepository;
     private final List<String> LIST_APPROVE = Arrays.asList(RoleEnum.ADMIN.name(),RoleEnum.SALE.name());
     @Override
-    public void createReturnForm(ReturnFormCreateDTO dto, String authHeader) throws InventoryException {
+    public void  createReturnForm(ReturnFormCreateDTO dto, String authHeader) throws InventoryException {
         Employee me = employeeServices.getFullInformation(authHeader);
         if(me == null || me.getRoleCode().equals(RoleEnum.EMPLOYEE.name())) {
             throw new InventoryException(
@@ -197,7 +197,7 @@ public class ReturnFormServicesImpl implements IReturnFormServices {
     public Page<ReturnFormDTO> findBySearchRequest(ReturnFormSearchReq dto, Pageable pageable, String authHeader) throws InventoryException {
          var content = returnFormCustomRepository.findBySearchReq(dto, pageable);
          var page = PageRequest.of(0, Integer.MAX_VALUE);
-         var employees = employeeServices.getAll(authHeader,page, new EmployeeSearchDTO()).stream().collect(
+         var employees = employeeRepository.findAll().stream().collect(
                  Collectors.toMap(Employee::getCode, Function.identity())
          );
          var customers = customerRepository.findAll().stream().collect(

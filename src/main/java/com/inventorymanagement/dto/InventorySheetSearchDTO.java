@@ -14,4 +14,5 @@ import java.time.LocalDate;
 public class InventorySheetSearchDTO {
     private LocalDate startDate;
     private LocalDate endDate;
+    private Boolean isReview;
 }

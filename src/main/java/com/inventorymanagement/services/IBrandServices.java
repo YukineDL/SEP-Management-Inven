@@ -9,5 +9,6 @@ import org.springframework.data.domain.Pageable;
 public interface IBrandServices {
     void create(String authHeader, BrandDTO brandDTO) throws InventoryException;
     void update(String authHeader, BrandDTO brandDTO, String brandCode) throws InventoryException;
-    Page<Brand> findAll( Pageable pageable) ;
+    Page<Brand> findAll( Pageable pageable);
+    void deleteByCode(String code) throws InventoryException;
 }

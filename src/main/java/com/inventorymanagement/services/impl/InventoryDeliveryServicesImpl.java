@@ -8,9 +8,7 @@ import com.inventorymanagement.exception.InventoryException;
 import com.inventorymanagement.repository.*;
 import com.inventorymanagement.repository.custom.InventoryDeliveryCustomRepository;
 import com.inventorymanagement.repository.custom.ProductDeliveryCustomRepository;
-import com.inventorymanagement.services.IEmployeeServices;
-import com.inventorymanagement.services.IInventoryDeliveryServices;
-import com.inventorymanagement.services.IOrderServices;
+import com.inventorymanagement.services.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
@@ -21,11 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,6 +41,9 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
     private final ProductDeliveryCustomRepository productDeliveryCustomRepository;
     private final EmployeeRepository employeeRepository;
     private final ProcessCheckRepository processCheckRepository;
+    private final IReturnFormServices returnFormServices;
+    private final UnitRepository unitRepository;
+    private final IProductServices productServices;
 
     @Override
     public void createInventoryDeliveryByOrderCode(String authHeader, String orderCode, InventoryDeliveryCreateDTO dto) throws InventoryException {
@@ -133,24 +132,7 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
                    int totalQuantity = product.getQuantity();
                    var batchList = productInventoryMap.get(product.getCode()).stream()
                            .filter(item -> item.getInventoryQuantity() > 0).toList();
-                   for (BatchNumber batch : batchList){
-                       totalQuantity -= batch.getInventoryQuantity();
-                       // if total quantity customer order is clear enough with product in inventory save batch number and stop
-                       if(totalQuantity <= 0){
-                           batch.setInventoryQuantity(Math.abs(totalQuantity));
-                           int exportQuantity = batch.getQuantityShipped() - batch.getInventoryQuantity();
-                           batch.setExportQuantityLast(batch.getExportQuantity());
-                           batch.setExportQuantity(exportQuantity);
-                           listBatchNumberChange.add(batch);
-                           break;
-                       }else{
-                           batch.setInventoryQuantity(0);
-                           int exportQuantity = batch.getQuantityShipped() - batch.getInventoryQuantity();
-                           batch.setExportQuantityLast(batch.getExportQuantity());
-                           batch.setExportQuantity(exportQuantity);
-                           listBatchNumberChange.add(batch);
-                       }
-                   }
+                   handleBatchNumber(batchList, listBatchNumberChange, totalQuantity);
                }
                batchNumberRepository.saveAll(listBatchNumberChange);
                List<ProductDelivery> itemExportDelivery = new ArrayList<>();
@@ -218,16 +200,18 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
             );
         }
         InventoryDelivery inventoryDelivery = inventoryDeliverOp.get();
-        var orderOp = orderRepository.findByCode(inventoryDelivery.getOrderCode());
-        if(orderOp.isEmpty()){
-            throw new InventoryException(
-                    ExceptionMessage.ORDER_NOT_EXISTED,
-                    ExceptionMessage.messages.get(ExceptionMessage.ORDER_NOT_EXISTED)
-            );
+        if(StringUtils.isNotEmpty(inventoryDelivery.getOrderCode())){
+            var orderOp = orderRepository.findByCode(inventoryDelivery.getOrderCode());
+            if(orderOp.isEmpty()){
+                throw new InventoryException(
+                        ExceptionMessage.ORDER_NOT_EXISTED,
+                        ExceptionMessage.messages.get(ExceptionMessage.ORDER_NOT_EXISTED)
+                );
+            }
+            var order = orderOp.get();
+            order.setIsUsed(false);
+            orderRepository.save(order);
         }
-        var order = orderOp.get();
-        order.setIsUsed(false);
-        orderRepository.save(order);
         inventoryDelivery.setApproveStatus(PURCHASE_ORDER_APPROVE.REJECTED.name());
         inventoryDelivery.setApproveBy(me.getName());
         inventoryDelivery.setApproveDate(LocalDateTime.now());
@@ -246,13 +230,15 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
     }
 
     @Override
-    public Page<InventoryDeliveryDTO> findBySearchRequest(InventoryDeliverySearchReqDTO reqDTO, Pageable pageable) {
+    public Page<InventoryDeliveryDTO> findBySearchRequest(InventoryDeliverySearchReqDTO reqDTO, Pageable pageable) throws InventoryException {
         Page<InventoryDeliveryDTO> content = inventoryDeliveryCustomRepository.findBySearchRequest(pageable,reqDTO);
         Map<Integer, Customer> customerMap = customerRepository.findAll().stream().collect(
                 Collectors.toMap(Customer::getId, customer -> customer)
         );
-        var productsMap = productRepository.findAll().stream().collect(
-                Collectors.toMap(Product::getCode,product -> product)
+        var productsMap = productServices.findAllBySearchRequest(
+                null,PageRequest.of(0,Integer.MAX_VALUE)
+        ).stream().collect(
+                Collectors.toMap(ProductDTO::getCode,product -> product)
         );
         for (InventoryDeliveryDTO item : content.getContent()){
             item.setCustomer(customerMap.get(item.getCustomerId()));
@@ -283,8 +269,10 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
         var customers = customerRepository.findAll().stream().collect(
                 Collectors.toMap(Customer::getId,customer -> customer)
         );
-        var productsMap = productRepository.findAll().stream().collect(
-                Collectors.toMap(Product::getCode,product -> product)
+        var productsMap = productServices.findAllBySearchRequest(
+                null,PageRequest.of(0,Integer.MAX_VALUE)
+        ).stream().collect(
+                Collectors.toMap(ProductDTO::getCode,product -> product)
         );
         var employeeMaps = employeeRepository.findAll().stream().collect(
                 Collectors.toMap(Employee::getCode,e -> e)
@@ -297,6 +285,118 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
             inventoryDelivery.setEmployee(employeeMaps.get(inventoryDelivery.getEmployeeCode()));
         }
         return inventoryDelivery;
+    }
+
+    @Override
+    public void createInventoryDeliveryReturn(String authHeader, String returnCode) throws InventoryException {
+        Employee me = employeeServices.getFullInformation(authHeader);
+        if(me == null || me.getRoleCode().equals(RoleEnum.SALE.name())){
+            throw new InventoryException(
+                    ExceptionMessage.NO_PERMISSION,
+                    ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
+            );
+        }
+        var returnForm = this.returnFormServices.findReturnForm(returnCode);
+        if(returnForm.getReturnForm().getApproveStatus().equals(PURCHASE_ORDER_APPROVE.REJECTED.name()) ||
+            returnForm.getReturnForm().getApproveStatus().equals(PURCHASE_ORDER_APPROVE.WAITING.name())){
+            throw new InventoryException(
+                    ExceptionMessage.INVENTORY_RECEIPT_NOT_APPROVE,
+                    ExceptionMessage.messages.get(ExceptionMessage.INVENTORY_RECEIPT_NOT_APPROVE)
+            );
+        }
+        // get product return broken
+        var productReturnBroken = returnForm.getReturnProducts().stream().filter(item -> item.getStatusProduct().equals(PRODUCT_STATUS.BROKEN.name())).toList();
+        if(productReturnBroken.isEmpty()){
+            throw new InventoryException(
+                    ExceptionMessage.RETURN_PRODUCT_BROKEN,
+                    ExceptionMessage.messages.get(ExceptionMessage.RETURN_PRODUCT_BROKEN)
+            );
+        }
+        // get codes
+        var productCodesReturn = productReturnBroken.stream().map(ReturnProductDTO::getProductCode).toList();
+        // get product inventory and filter quantity > 0
+        var productInventory = batchNumberRepository.findProductByStatusInAndProductCodeIn(productCodesReturn,
+                List.of(PRODUCT_STATUS.NEW.name(), PRODUCT_STATUS.OLD.name())).stream().filter(item -> item.getInventoryQuantity() > 0).toList();
+        // sum data product to get quantity
+        var productQuantity = productInventory.stream().collect(
+                Collectors.toMap(
+                        BatchNumber::getProductCode,
+                        BatchNumber::getInventoryQuantity,
+                        Integer::sum
+                )
+        );
+        for (ReturnProductDTO item : productReturnBroken){
+            var productInventoryQuantity = productQuantity.get(item.getProductCode());
+            if(Objects.isNull(productInventoryQuantity)){
+                throw new InventoryException(
+                        ExceptionMessage.PRODUCT_NOT_ENOUGH,
+                        String.format(
+                                ExceptionMessage.messages.get(ExceptionMessage.PRODUCT_NOT_ENOUGH),
+                                item.getProductCode()
+                        )
+                );
+            }
+            if(item.getQuantityReturn() > productInventoryQuantity){
+                throw new InventoryException(
+                        ExceptionMessage.PRODUCT_NOT_ENOUGH,
+                        String.format(
+                                ExceptionMessage.messages.get(ExceptionMessage.PRODUCT_NOT_ENOUGH),
+                                item.getProductCode()
+                        )
+                );
+            }
+        }
+        List<BatchNumber> listBatchNumberChange = new ArrayList<>();
+        for (ReturnProductDTO product : productReturnBroken){
+            int totalQuantity = product.getQuantityReturn();
+            handleBatchNumber(productInventory, listBatchNumberChange, totalQuantity);
+        }
+        InventoryDelivery inventoryDelivery = InventoryDelivery.builder()
+                .code(createCode())
+                .deliveryType(DELIVERY_TYPE.DELIVERY_RETURN.name())
+                .approveStatus(PURCHASE_ORDER_APPROVE.WAITING.name())
+                .exportStatus(EXPORT_STATUS.WAITING_EXPORT.name())
+                .createAt(LocalDateTime.now())
+                .customerId(returnForm.getCustomer().getId())
+                .totalAmount((double) 0)
+                .employeeCode(me.getCode())
+                .returnFormCode(returnCode)
+                .build();
+        List<ProductDelivery> productDeliveryList = new ArrayList<>();
+        for(BatchNumber batch : listBatchNumberChange){
+            var exportQuantity = batch.getExportQuantity() - batch.getExportQuantityLast();
+            ProductDelivery productDelivery = ProductDelivery.builder()
+                    .batchNumberId(batch.getId())
+                    .exportQuantity(exportQuantity)
+                    .inventoryDeliveryCode(inventoryDelivery.getCode())
+                    .priceExport((double)0)
+                    .build();
+            productDeliveryList.add(productDelivery);
+        }
+        inventoryDeliveryRepository.save(inventoryDelivery);
+        batchNumberRepository.saveAll(listBatchNumberChange);
+        productDeliveryRepository.saveAll(productDeliveryList);
+    }
+
+    private void handleBatchNumber(List<BatchNumber> productInventory, List<BatchNumber> listBatchNumberChange, int totalQuantity) {
+        for (BatchNumber batch : productInventory){
+            totalQuantity -= batch.getInventoryQuantity();
+            // if total quantity customer order is clear enough with product in inventory save batch number and stop
+            if(totalQuantity <= 0){
+                batch.setInventoryQuantity(Math.abs(totalQuantity));
+                int exportQuantity = batch.getQuantityShipped() - batch.getInventoryQuantity();
+                batch.setExportQuantityLast(batch.getExportQuantity());
+                batch.setExportQuantity(exportQuantity);
+                listBatchNumberChange.add(batch);
+                break;
+            }else{
+                batch.setInventoryQuantity(0);
+                int exportQuantity = batch.getQuantityShipped() - batch.getInventoryQuantity();
+                batch.setExportQuantityLast(batch.getExportQuantity());
+                batch.setExportQuantity(exportQuantity);
+                listBatchNumberChange.add(batch);
+            }
+        }
     }
 
     private String createCode(){

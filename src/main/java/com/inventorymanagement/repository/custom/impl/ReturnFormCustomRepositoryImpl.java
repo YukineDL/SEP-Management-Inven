@@ -76,6 +76,10 @@ public class ReturnFormCustomRepositoryImpl extends BaseCustomRepository impleme
             sql.append(" and rf.total_amount <= :amountTo ");
             params.put("amountTo",req.getAmountTo());
         }
+        if(StringUtils.isNotEmpty(req.getApproveStatus())){
+            sql.append(" and rf.approve_status <= :approveStatus ");
+            params.put("approveStatus",req.getApproveStatus());
+        }
     }
 
 }
