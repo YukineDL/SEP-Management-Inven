@@ -75,7 +75,7 @@ public class OrderServicesImpl implements IOrderServices {
     @Override
     public void updateOrder(OrderCreateDTO dto, String authHeader, String code) throws InventoryException {
         Employee me = employeeService.getFullInformation(authHeader);
-        if(Objects.isNull(me) || me.getRoleCode().contains(RoleEnum.SALE.name())){
+        if(Objects.isNull(me) || !LIST_ORDER_ROLE.contains(me.getRoleCode())){
             throw new InventoryException(
                     ExceptionMessage.NO_PERMISSION,
                     ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
@@ -115,7 +115,7 @@ public class OrderServicesImpl implements IOrderServices {
     @Override
     public void approveOrder(String orderCode, String authHeader) throws InventoryException {
         Employee me = employeeService.getFullInformation(authHeader);
-        if(me == null || me.getRoleCode().contains(RoleEnum.SALE.name())){
+        if(me == null || !LIST_ORDER_ROLE.contains(me.getRoleCode())){
             throw new InventoryException(
                     ExceptionMessage.NO_PERMISSION,
                     ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
@@ -174,7 +174,7 @@ public class OrderServicesImpl implements IOrderServices {
     @Override
     public void rejectOrder(String orderCode, String authHeader) throws InventoryException {
         Employee me = employeeService.getFullInformation(authHeader);
-        if(me == null || me.getRoleCode().contains(RoleEnum.SALE.name())){
+        if(me == null || !LIST_ORDER_ROLE.contains(me.getRoleCode())){
             throw new InventoryException(
                     ExceptionMessage.NO_PERMISSION,
                     ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)

@@ -27,10 +27,10 @@ public class OrderProductCustomRepositoryImpl implements OrderProductCustomRepos
                 JOIN order_product op on op.order_code = o.code
                 JOIN product p on p.code = op.product_code
                 LEFT JOIN batch_number bn on bn.product_code = op.product_code
-                where 1=1
+                where 1=1 and bn.status <> 'BROKEN'
                 """;
         groupBySql.append("""
-                group by op.product_code, op.quantity, p.name, p.unit_code, p.selling_price, op.discount, p.image_path
+                group by op.product_code, op.quantity, p.name, p.unit_code, p.selling_price, op.discount, p.image_path, bn.status
                 """);
         StringBuilder whereSQL = new StringBuilder();
         Map<String, Object> params = new HashMap<>();

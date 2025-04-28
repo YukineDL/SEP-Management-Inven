@@ -19,7 +19,7 @@ public class Constants {
     public static String PRODUCT_DEPEND_CATEGORY_PATH = "/products/get-list-products-category";
     public static String PRODUCT_PATH_CATEGORY = "/products/category/[^/]+";
     public static final List<String> LIST_MANAGER = new ArrayList<>(List.of(RoleEnum.ADMIN.name(),
-            RoleEnum.MANAGER.name()));
+            RoleEnum.MANAGER.name(), RoleEnum.EMPLOYEE.name()));
     public static String PRODUCT_PREFIX_CODE = "SKU-";
     public static String PURCHASE_ORDER_CODE = "PU";
     public static String INVENTORY_RECEIPT_CODE = "IR";

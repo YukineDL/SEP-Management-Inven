@@ -56,6 +56,7 @@ public class ExceptionMessage {
     public static String UPDATE_PASSWORD_FAIL = "UPDATE_PASSWORD_FAIL";
     public static String RETURN_PRODUCT_BROKEN = "RETURN_PRODUCT_BROKEN";
     public static String PHONE_NUMBER_EXISTED = "PHONE_NUMBER_EXISTED";
+    public static String RETURN_FOR_IS_USED = "RETURN_FOR_IS_USED";
 
     static {
         messages.put(EXISTED_EMPLOYEE, "Nhân viên đã tồn tại");
@@ -108,5 +109,6 @@ public class ExceptionMessage {
         messages.put(UPDATE_PASSWORD_FAIL, "Mật khẩu cũ không chính xác");
         messages.put(RETURN_PRODUCT_BROKEN, "Đơn hàng không có sản phẩm hỏng");
         messages.put(PHONE_NUMBER_EXISTED, "Số điện thoại đã tồn tại");
+        messages.put(RETURN_PRODUCT_OVER_ORDER, "Phiếu đã được sử dụng");
     }
 }

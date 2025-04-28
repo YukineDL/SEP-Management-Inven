@@ -44,6 +44,7 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
     private final IReturnFormServices returnFormServices;
     private final UnitRepository unitRepository;
     private final IProductServices productServices;
+    private final ReturnFormRepository returnFormRepository;
 
     @Override
     public void createInventoryDeliveryByOrderCode(String authHeader, String orderCode, InventoryDeliveryCreateDTO dto) throws InventoryException {
@@ -115,49 +116,32 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
                 .orderCode(orderCode)
                 .employeeCode(me.getCode())
                 .build();
+        // handle export product
+        List<BatchNumber> listBatchNumberChange = new ArrayList<>();
+        for (ProductOrderDTO product : orderDTO.getOrderProducts()){
+            int totalQuantity = product.getQuantity();
+            var batchList = productInventoryMap.get(product.getCode()).stream()
+                    .filter(item -> item.getInventoryQuantity() > 0).toList();
+            handleBatchNumber(batchList, listBatchNumberChange, totalQuantity);
+        }
+        batchNumberRepository.saveAll(listBatchNumberChange);
+        List<ProductDelivery> itemExportDelivery = new ArrayList<>();
+        for (BatchNumber batch : listBatchNumberChange){
+            var exportQuantity = batch.getExportQuantity() - batch.getExportQuantityLast();
+            var discount = productWithDiscount.get(batch.getProductCode());
+            var product = mapProduct.get(batch.getProductCode());
+            var priceExport = (product.getSellingPrice() * exportQuantity) - (product.getSellingPrice() * exportQuantity * discount) ;
+            ProductDelivery item = ProductDelivery.builder()
+                    .inventoryDeliveryCode(inventoryDelivery.getCode())
+                    .batchNumberId(batch.getId())
+                    .exportQuantity(exportQuantity)
+                    .priceExport(Math.ceil(priceExport))
+                    .build();
+            itemExportDelivery.add(item);
+        }
         inventoryDeliveryRepository.save(inventoryDelivery);
         orderRepository.save(order);
-        String key = UUID.randomUUID().toString();
-        ProcessCheck process = ProcessCheck.builder()
-                .checkSync(key)
-                .status(Constants.PROCESSING)
-                .createAt(LocalDateTime.now())
-                .build();
-        processCheckRepository.save(process);
-        CompletableFuture.runAsync(() -> {
-            // handle export product
-           try {
-               List<BatchNumber> listBatchNumberChange = new ArrayList<>();
-               for (ProductOrderDTO product : orderDTO.getOrderProducts()){
-                   int totalQuantity = product.getQuantity();
-                   var batchList = productInventoryMap.get(product.getCode()).stream()
-                           .filter(item -> item.getInventoryQuantity() > 0).toList();
-                   handleBatchNumber(batchList, listBatchNumberChange, totalQuantity);
-               }
-               batchNumberRepository.saveAll(listBatchNumberChange);
-               List<ProductDelivery> itemExportDelivery = new ArrayList<>();
-               for (BatchNumber batch : listBatchNumberChange){
-                   var exportQuantity = batch.getExportQuantity() - batch.getExportQuantityLast();
-                   var discount = productWithDiscount.get(batch.getProductCode());
-                   var product = mapProduct.get(batch.getProductCode());
-                   var priceExport = (product.getSellingPrice() * exportQuantity) - (product.getSellingPrice() * exportQuantity * discount) ;
-                   ProductDelivery item = ProductDelivery.builder()
-                           .inventoryDeliveryCode(inventoryDelivery.getCode())
-                           .batchNumberId(batch.getId())
-                           .exportQuantity(exportQuantity)
-                           .priceExport(Math.ceil(priceExport))
-                           .build();
-                   itemExportDelivery.add(item);
-               }
-               productDeliveryRepository.saveAll(itemExportDelivery);
-               process.setStatus(Constants.SUCCESS);
-               processCheckRepository.save(process);
-           } catch (Exception e){
-                process.setStatus(Constants.FAIL);
-                processCheckRepository.save(process);
-                log.info(e.getMessage());
-           }
-        });
+        productDeliveryRepository.saveAll(itemExportDelivery);
     }
 
     @Override
@@ -297,6 +281,12 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
             );
         }
         var returnForm = this.returnFormServices.findReturnForm(returnCode);
+        if(BooleanUtils.isTrue(returnForm.getReturnForm().getIsUsed())){
+            throw new InventoryException(
+                    ExceptionMessage.RETURN_FORM_IS_USED,
+                    ExceptionMessage.messages.get(ExceptionMessage.RETURN_FORM_IS_USED)
+            );
+        }
         if(returnForm.getReturnForm().getApproveStatus().equals(PURCHASE_ORDER_APPROVE.REJECTED.name()) ||
             returnForm.getReturnForm().getApproveStatus().equals(PURCHASE_ORDER_APPROVE.WAITING.name())){
             throw new InventoryException(
@@ -304,6 +294,8 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
                     ExceptionMessage.messages.get(ExceptionMessage.INVENTORY_RECEIPT_NOT_APPROVE)
             );
         }
+        returnForm.getReturnForm().setIsUsed(true);
+        returnFormRepository.save(returnForm.getReturnForm());
         // get product return broken
         var productReturnBroken = returnForm.getReturnProducts().stream().filter(item -> item.getStatusProduct().equals(PRODUCT_STATUS.BROKEN.name())).toList();
         if(productReturnBroken.isEmpty()){
