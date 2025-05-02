@@ -55,42 +55,42 @@ public class BrandServicesImpl implements IBrandServices {
         brandRepository.save(brand);
     }
 
-    @Override
-    public void update(String authHeader, BrandDTO brandDTO, String brandCode) throws InventoryException {
-        Employee me = employeeService.getFullInformation(authHeader);
-        if(!Constants.LIST_MANAGER.contains(me.getRoleCode())){
-            throw new InventoryException(
-                    ExceptionMessage.NO_PERMISSION,
-                    ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
-            );
-        }
+        @Override
+        public void update(String authHeader, BrandDTO brandDTO, String brandCode) throws InventoryException {
+            Employee me = employeeService.getFullInformation(authHeader);
+            if(!Constants.LIST_MANAGER.contains(me.getRoleCode())){
+                throw new InventoryException(
+                        ExceptionMessage.NO_PERMISSION,
+                        ExceptionMessage.messages.get(ExceptionMessage.NO_PERMISSION)
+                );
+            }
 
-        if(brandDTO.getBrandName().isEmpty()){
-            throw new InventoryException(
-                    ExceptionMessage.BRAND_NAME_EMPTY,
-                    ExceptionMessage.messages.get(ExceptionMessage.BRAND_NAME_EMPTY)
-            );
-        }
-        Optional<Brand> brandOptional = brandRepository.findByCode(brandCode);
-        if(brandOptional.isEmpty()){
-            throw new InventoryException(
-                    ExceptionMessage.BRAND_NOT_EXISTED,
-                    ExceptionMessage.messages.get(ExceptionMessage.BRAND_NOT_EXISTED)
-            );
-        }
-        if(BooleanUtils.isTrue(brandRepository.existsByNameAndCodeNotLike(brandDTO.getBrandName(),brandCode))){
-            throw new InventoryException(
-                    ExceptionMessage.BRAND_NAME_EXISTED,
-                    ExceptionMessage.messages.get(ExceptionMessage.BRAND_NAME_EXISTED)
-            );
-        }
+            if(brandDTO.getBrandName().isEmpty()){
+                throw new InventoryException(
+                        ExceptionMessage.BRAND_NAME_EMPTY,
+                        ExceptionMessage.messages.get(ExceptionMessage.BRAND_NAME_EMPTY)
+                );
+            }
+            Optional<Brand> brandOptional = brandRepository.findByCode(brandCode);
+            if(brandOptional.isEmpty()){
+                throw new InventoryException(
+                        ExceptionMessage.BRAND_NOT_EXISTED,
+                        ExceptionMessage.messages.get(ExceptionMessage.BRAND_NOT_EXISTED)
+                );
+            }
+            if(BooleanUtils.isTrue(brandRepository.existsByNameAndCodeNotLike(brandDTO.getBrandName(),brandCode))){
+                throw new InventoryException(
+                        ExceptionMessage.BRAND_NAME_EXISTED,
+                        ExceptionMessage.messages.get(ExceptionMessage.BRAND_NAME_EXISTED)
+                );
+            }
 
 
-        Brand brand = brandOptional.get();
-        brand.setName(brandDTO.getBrandName());
+            Brand brand = brandOptional.get();
+            brand.setName(brandDTO.getBrandName());
 
-        brandRepository.save(brand);
-    }
+            brandRepository.save(brand);
+        }
 
     @Override
     public Page<Brand> findAll(Pageable pageable)   {

@@ -52,6 +52,8 @@ public class InventoryReceiptServicesImpl implements IInventoryReceiptServices {
     public String createReceipt(InventoryReceiptReqDTO receiptReqDTO) throws InventoryException {
         List<String> statusApprove = List.of(PURCHASE_ORDER_APPROVE.APPROVED.name(),
                 PURCHASE_ORDER_APPROVE.WAITING.name());
+
+
         if(Boolean.TRUE.equals(inventoryReceiptRepository.existsByPurchaseOrderCodeAndApproveIn(receiptReqDTO.getPurchaseOrderCode()
                 , statusApprove))){
             throw new InventoryException(
@@ -59,6 +61,8 @@ public class InventoryReceiptServicesImpl implements IInventoryReceiptServices {
                     ExceptionMessage.messages.get(ExceptionMessage.INVALID_CREATE_INVENTORY_RECEIPT)
             );
         }
+
+
         Optional<PurchaseOrder> purchaseOrderOP = purchaseOrderRepository.findByCode(receiptReqDTO.getPurchaseOrderCode());
         if(purchaseOrderOP.isEmpty()){
             throw new InventoryException(
@@ -66,6 +70,8 @@ public class InventoryReceiptServicesImpl implements IInventoryReceiptServices {
                     ExceptionMessage.messages.get(ExceptionMessage.PURCHASE_ORDER_NOT_EXIST)
             );
         }
+
+
         PurchaseOrder purchaseOrder = purchaseOrderOP.get();
         purchaseOrder.setIsUsed(true);
         purchaseOrderRepository.save(purchaseOrder);
