@@ -64,7 +64,7 @@ public class ProductSheetCustomRepositoryImpl extends BaseCustomRepository imple
                 select bn.product_code,bn.status ,SUM(pd.price_export) total_export_amount from inventory_delivery id
                 join product_delivery pd on pd.inventory_delivery_code = id.code
                 join batch_number bn on bn.id = pd.batch_number_id
-                where id.create_at >= :fromDate and id.create_at <= :toDate and id.approve_status <> '
+                WHERE bn.create_at >= :fromDate AND bn.create_at <= :toDate and id.approve_status <> '
                 """).append(PURCHASE_ORDER_APPROVE.REJECTED.name()).append("'")
                 .append(" group by bn.product_code, bn.status ");
 

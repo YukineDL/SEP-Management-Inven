@@ -38,6 +38,8 @@ public class ReturnForm {
     private Double totalAmount;
     @Column(name = "customer_id")
     private Integer customerId;
+    @Column(name = "is_export")
+    private Boolean isExport;
     @PrePersist
     public void prePersist() {
         if (this.createAt == null) {

@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 
 public interface IInventorySheetServices {
-    String createInventorySheet(String authHeader, LocalDate startDate, LocalDate endDate) throws InventoryException;
+    String createInventorySheet(String authHeader, LocalDate startDate, LocalDate endDate, String reason) throws InventoryException;
     InventorySheetDTO getDetailInventorySheetBySearchRequest(Pageable pageable, ProductSheetSearchReqDTO dto) throws InventoryException;
     Page<InventorySheet> findBySearchRequest(Pageable pageable, InventorySheetSearchDTO dto) ;
     void reviewInventorySheet(String authHeader, String code) throws InventoryException;

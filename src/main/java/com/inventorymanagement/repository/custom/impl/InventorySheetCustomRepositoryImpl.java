@@ -41,7 +41,7 @@ public class InventorySheetCustomRepositoryImpl extends BaseCustomRepository imp
                 """);
         var params = new HashMap<String, Object>();
         this.addParams(whereSql,params, req);
-        sql.append(selectSql).append(whereSql).append(pageSql);
+        sql.append(selectSql).append(whereSql).append(orderSql).append(pageSql);
         Query query = em.createNativeQuery(sql.toString(),InventorySheet.class);
         this.setParams(query,params);
         this.addingPageQuery(pageSql,pageable);

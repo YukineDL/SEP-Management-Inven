@@ -105,6 +105,7 @@ public class ReturnFormServicesImpl implements IReturnFormServices {
                 .customerId(dto.getCustomerId())
                 .createBy(me.getCode())
                 .isUsed(false)
+                .isExport(false)
                 .approveStatus(PURCHASE_ORDER_APPROVE.WAITING.name())
                 .build();
         String key = UUID.randomUUID().toString();
@@ -196,7 +197,6 @@ public class ReturnFormServicesImpl implements IReturnFormServices {
     @Override
     public Page<ReturnFormDTO> findBySearchRequest(ReturnFormSearchReq dto, Pageable pageable, String authHeader) throws InventoryException {
          var content = returnFormCustomRepository.findBySearchReq(dto, pageable);
-         var page = PageRequest.of(0, Integer.MAX_VALUE);
          var employees = employeeRepository.findAll().stream().collect(
                  Collectors.toMap(Employee::getCode, Function.identity())
          );
@@ -213,7 +213,7 @@ public class ReturnFormServicesImpl implements IReturnFormServices {
             returnFormDTO.setCustomer(customers.get(returnForm.getCustomerId()));
             results.add(returnFormDTO);
          }
-        return new PageImpl<>(results, page, content.getTotalElements());
+        return new PageImpl<>(results, content.getPageable(), content.getTotalPages());
     }
 
     @Override

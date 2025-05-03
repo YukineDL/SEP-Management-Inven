@@ -54,7 +54,7 @@ public class InventorySheetServicesImpl implements IInventorySheetServices {
     private final IUnitServices unitServices;
     private final ProductRepository productRepository;
     @Override
-    public String createInventorySheet(String authHeader, LocalDate startDate, LocalDate endDate) throws InventoryException {
+    public String createInventorySheet(String authHeader, LocalDate startDate, LocalDate endDate, String reason) throws InventoryException {
         Employee me = employeeService.getFullInformation(authHeader);
         if(me == null || me.getRoleCode().equals(RoleEnum.SALE.name())){
             throw new InventoryException(
@@ -73,8 +73,9 @@ public class InventorySheetServicesImpl implements IInventorySheetServices {
                 .code(this.createCode())
                 .startDate(startDate)
                 .endDate(endDate)
-                .createAt(LocalDate.now())
+                .createAt(LocalDateTime.now())
                 .employeeCode(me.getCode())
+                .reason(reason)
                 .isReview(false)
                 .build();
         inventorySheetRepository.save(inventorySheet);

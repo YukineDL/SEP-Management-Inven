@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -21,7 +22,7 @@ public class InventorySheet {
     @Column(name = "code")
     private String code;
     @Column(name = "create_at")
-    private LocalDate createAt;
+    private LocalDateTime createAt;
     @Column(name = "employee_code")
     private String employeeCode;
     @Column(name = "start_date")
@@ -30,4 +31,6 @@ public class InventorySheet {
     private LocalDate endDate;
     @Column(name = "is_review")
     private Boolean isReview;
+    @Column(name = "reason")
+    private String reason;
 }

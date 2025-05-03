@@ -46,7 +46,7 @@ public class BrandServicesImpl implements IBrandServices {
                 .name(brandDTO.getBrandName())
                 .isDeleted(false)
                 .build();
-        if(brandRepository.existsByCode(brand.getCode())){
+        if(brandRepository.existsByCodeAndIsDeleted(brand.getCode(), false)){
             throw new InventoryException(
                     ExceptionMessage.BRAND_EXISTED,
                     ExceptionMessage.messages.get(ExceptionMessage.BRAND_EXISTED)
@@ -71,7 +71,7 @@ public class BrandServicesImpl implements IBrandServices {
                     ExceptionMessage.messages.get(ExceptionMessage.BRAND_NAME_EMPTY)
             );
         }
-        Optional<Brand> brandOptional = brandRepository.findByCode(brandCode);
+        Optional<Brand> brandOptional = brandRepository.findByCodeAndIsDeleted(brandCode, false);
         if(brandOptional.isEmpty()){
             throw new InventoryException(
                     ExceptionMessage.BRAND_NOT_EXISTED,
@@ -100,7 +100,7 @@ public class BrandServicesImpl implements IBrandServices {
 
     @Override
     public void deleteByCode(String code) throws InventoryException {
-        var brandOp = this.brandRepository.findByCode(code);
+        var brandOp = this.brandRepository.findByCodeAndIsDeleted(code, false);
         if(brandOp.isEmpty()){
             throw new InventoryException(
                     ExceptionMessage.BRAND_NOT_EXISTED,

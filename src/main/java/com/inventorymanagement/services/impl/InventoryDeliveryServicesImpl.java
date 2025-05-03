@@ -281,7 +281,7 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
             );
         }
         var returnForm = this.returnFormServices.findReturnForm(returnCode);
-        if(BooleanUtils.isTrue(returnForm.getReturnForm().getIsUsed())){
+        if(BooleanUtils.isTrue(returnForm.getReturnForm().getIsExport())){
             throw new InventoryException(
                     ExceptionMessage.RETURN_FORM_IS_USED,
                     ExceptionMessage.messages.get(ExceptionMessage.RETURN_FORM_IS_USED)
@@ -294,7 +294,7 @@ public class InventoryDeliveryServicesImpl implements IInventoryDeliveryServices
                     ExceptionMessage.messages.get(ExceptionMessage.INVENTORY_RECEIPT_NOT_APPROVE)
             );
         }
-        returnForm.getReturnForm().setIsUsed(true);
+        returnForm.getReturnForm().setIsExport(true);
         returnFormRepository.save(returnForm.getReturnForm());
         // get product return broken
         var productReturnBroken = returnForm.getReturnProducts().stream().filter(item -> item.getStatusProduct().equals(PRODUCT_STATUS.BROKEN.name())).toList();

@@ -27,11 +27,12 @@ public class InventorySheetController {
     @PostMapping(value = "/sheet")
     public ResponseEntity<Object> createSheetProductByTime(@RequestParam LocalDate startDate,
                                                            @RequestParam LocalDate endDate,
+                                                           @RequestParam String reason,
                                                            HttpServletRequest request) {
         try {
             String authHeader = request.getHeader("Authorization");
             return new ResponseEntity<>(
-                    inventorySheetServices.createInventorySheet(authHeader, startDate, endDate),
+                    inventorySheetServices.createInventorySheet(authHeader, startDate, endDate, reason),
                     HttpStatus.CREATED);
         } catch (InventoryException e){
             return new ResponseEntity<>(

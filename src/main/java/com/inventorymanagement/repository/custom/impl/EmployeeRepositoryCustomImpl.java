@@ -24,6 +24,7 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
     @Override
     public Page<Employee> findAllBySearch(EmployeeSearchDTO searchDTO, Pageable pageable) {
         StringBuilder sql = new StringBuilder();
+        StringBuilder sqlCount = new StringBuilder();
         Map<String,Object> parameters = new HashMap<>();
         sql.append("""
                 SELECT * FROM employee
@@ -31,12 +32,18 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
                 """);
         sql.append(" and role_code <> '").append(RoleEnum.ADMIN.name()).append("'");
         addingWhereClause(sql,searchDTO,parameters);
+        sqlCount.append("""
+                SELECT COUNT(1) FROM employee
+                where 1=1
+                """).append(" and role_code <> '").append(RoleEnum.ADMIN.name()).append("'");
+        addingWhereClause(sqlCount,searchDTO,parameters);
         addingPaging(sql, pageable);
         Query query = entityManager.createNativeQuery(sql.toString(),Employee.class);
+        Query queryCount = entityManager.createNativeQuery(sqlCount.toString());
         setParameters(query,parameters);
-
+        setParameters(queryCount,parameters);
         var results = query.getResultList();
-        return new PageImpl<>(results,pageable,results.size());
+        return new PageImpl<>(results,pageable,(Long)queryCount.getSingleResult());
     }
     private void addingWhereClause(StringBuilder sql,
                                    EmployeeSearchDTO searchDTO,

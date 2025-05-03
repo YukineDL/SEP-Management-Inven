@@ -103,7 +103,6 @@ public class ExceptionMessage {
         messages.put(BRAND_NAME_EMPTY, "Tên nhãn hàng đã tồn tại");
         messages.put(CATEGORY_NAME_EXISTED, "Tên danh mục đã tồn tại");
         messages.put(INVENTORY_SHEET_EXISTED_TIME, "Đã có phiếu kiểm kê vào thời gian này");
-        messages.put(INVENTORY_SHEET_EXISTED_TIME, "Phiếu kiểm kê không tồn tại");
         messages.put(UNIT_CODE_SAME, "Đơn vị tính đã tồn tại");
         messages.put(UNIT_NOT_EXISTED, "Đơn vị tính không tồn tại");
         messages.put(UPDATE_PASSWORD_FAIL, "Mật khẩu cũ không chính xác");
