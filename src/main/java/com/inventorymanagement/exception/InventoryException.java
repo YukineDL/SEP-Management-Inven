@@ -23,7 +23,4 @@ public class InventoryException extends Exception {
         this.message = message;
     }
 
-    public String getErrorCode() {
-        return null;
-    }
 }

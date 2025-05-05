@@ -29,9 +29,12 @@ public class InventorySheetCustomRepositoryImpl extends BaseCustomRepository imp
         StringBuilder whereSql = new StringBuilder();
         StringBuilder pageSql = new StringBuilder();
         StringBuilder orderSql = new StringBuilder();
+        StringBuilder sqlCount = new StringBuilder();
         selectSql.append("""
                 SELECT *
                 """);
+        sqlCount.append("""
+                SELECT COUNT(1)""");
         whereSql.append("""
                 FROM inventory_sheet
                 WHERE 1=1
@@ -41,11 +44,14 @@ public class InventorySheetCustomRepositoryImpl extends BaseCustomRepository imp
                 """);
         var params = new HashMap<String, Object>();
         this.addParams(whereSql,params, req);
+        this.addingPageQuery(pageSql,pageable);
         sql.append(selectSql).append(whereSql).append(orderSql).append(pageSql);
+        sqlCount.append(whereSql);
+        Query queryCount = em.createNativeQuery(sqlCount.toString());
         Query query = em.createNativeQuery(sql.toString(),InventorySheet.class);
         this.setParams(query,params);
-        this.addingPageQuery(pageSql,pageable);
-        return new PageImpl<>(query.getResultList(), pageable,query.getResultList().size());
+        this.setParams(queryCount,params);
+        return new PageImpl<>(query.getResultList(), pageable,(Long) queryCount.getSingleResult());
     }
     private void addParams(StringBuilder sql, Map<String, Object> params, InventorySheetSearchDTO dto) {
         if(!Objects.isNull(dto.getStartDate()) && !Objects.isNull(dto.getEndDate())) {

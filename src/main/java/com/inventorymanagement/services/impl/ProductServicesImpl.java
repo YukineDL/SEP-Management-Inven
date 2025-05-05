@@ -163,8 +163,8 @@ public class ProductServicesImpl implements IProductServices {
         );
         for (Product item : content){
             ProductDTO dto = new ProductDTO(item);
-            dto.setBrandName(brandMapValue.get(dto.getBrandCode()).getName());
-            dto.setCategoryName(categoryMapValue.get(dto.getCategoryCode()).getName());
+            dto.setBrandName(brandMapValue.get(dto.getBrandCode()) != null ? brandMapValue.get(dto.getBrandCode()).getName() : StringUtils.EMPTY);
+            dto.setCategoryName(categoryMapValue.get(dto.getCategoryCode()) != null ? categoryMapValue.get(dto.getCategoryCode()).getName() : StringUtils.EMPTY);
             dto.setUnitName(unitMap.get(item.getUnitCode()));
             if(mapCategoryProduct.containsKey(item.getCategoryCode())){
                 mapCategoryProduct.get(item.getCategoryCode()).add(dto);
